@@ -32,7 +32,7 @@
 'copy_assets:output\\assets\\js\\jquery.min.js', (33792, 488)
 'copy_assets:output\\assets\\js\\gallery.min.js', (34304, 474)
 'copy_assets:output\\assets\\xml\\rss.xsl', (34816, 465)
-'sitemap:output\\sitemap.xml', (58368, 1286)
+'sitemap:output\\sitemap.xml', (58368, 1285)
 'render_taxonomies:output\\index.html', (67584, 5997)
 'redirect', (41984, 56)
 'copy_assets:output\\assets\\xml\\atom.xsl', (42496, 467)
