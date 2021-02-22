@@ -55,3 +55,7 @@
 'copy_assets:output\\assets\\css\\bootblog.css', (51200, 485)
 'render_posts:timeline_changes', (51712, 109)
 'copy_assets:output\\assets\\css\\bootstrap.min.css', (52224, 498)
+'render_taxonomies:output\\2021\\index.html', (52736, 2980)
+'render_sources:output\\posts\\shi-yong-nikolachuang-jian-ge-ren-bo-ke\\index.md', (57856, 305)
+'render_pages:output\\posts\\shi-yong-nikolachuang-jian-ge-ren-bo-ke\\index.html', (59904, 6893)
+'render_posts:cache\\posts\\shi-yong-nikolachuang-jian-ge-ren-bo-ke.html', (67072, 448)
