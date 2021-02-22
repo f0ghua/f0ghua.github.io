@@ -1,2 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<?xml-stylesheet type="text/xsl" href="assets/xml/rss.xsl" media="all"?><rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>fog's blog</title><link>https://example.com/</link><description>This is a demo site for Nikola.</description><atom:link href="https://example.com/rss.xml" rel="self" type="application/rss+xml"></atom:link><language>en</language><copyright>Contents © 2021 &lt;a href="mailto:fog.hua@gmail.com"&gt;fog hua&lt;/a&gt; </copyright><lastBuildDate>Mon, 22 Feb 2021 11:51:50 GMT</lastBuildDate><generator>Nikola (getnikola.com)</generator><docs>http://blogs.law.harvard.edu/tech/rss</docs></channel></rss>
+<?xml-stylesheet type="text/xsl" href="assets/xml/rss.xsl" media="all"?><rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>fog's blog</title><link>https://example.com/</link><description>This is a demo site for Nikola.</description><atom:link href="https://example.com/rss.xml" rel="self" type="application/rss+xml"></atom:link><language>en</language><copyright>Contents © 2021 &lt;a href="mailto:fog.hua@gmail.com"&gt;fog hua&lt;/a&gt; </copyright><lastBuildDate>Mon, 22 Feb 2021 12:14:34 GMT</lastBuildDate><generator>Nikola (getnikola.com)</generator><docs>http://blogs.law.harvard.edu/tech/rss</docs><item><title>使用Nikola创建个人博客</title><link>https://example.com/posts/shi-yong-nikolachuang-jian-ge-ren-bo-ke/</link><dc:creator>fog hua</dc:creator><description>&lt;div&gt;&lt;h3&gt;Windows&lt;/h3&gt;
+&lt;h4&gt;安装&lt;/h4&gt;
+&lt;p&gt;我Windows机器上用的是winpython3.8.7，按照Nikola的官方文档&lt;code&gt;Getting Started&lt;/code&gt;，在winpython的命令窗口中输入以下命令进行安装：&lt;/p&gt;
+&lt;pre class="code literal-block"&gt;&lt;span class="c1"&gt;# path D:\xPortable\Tools\python\WPy32-3870\scripts&amp;gt;&lt;/span&gt;
+&amp;gt; python -m venv nikola
+&amp;gt; &lt;span class="nb"&gt;cd&lt;/span&gt; nikola
+&amp;gt; Scripts&lt;span class="se"&gt;\a&lt;/span&gt;ctivate
+&amp;gt; Scripts&lt;span class="se"&gt;\p&lt;/span&gt;ython -m pip install -U pip setuptools wheel
+&amp;gt; Scripts&lt;span class="se"&gt;\p&lt;/span&gt;ython -m pip install -U &lt;span class="s2"&gt;"Nikola"&lt;/span&gt;
+...snip...
+Successfully installed Nikola
+&lt;/pre&gt;
+&lt;p&gt;需要注意的是venv的目录必须在scripts下面创建，不能生成在别处，否则venv的路径会不对。&lt;/p&gt;
+&lt;h4&gt;github配置&lt;/h4&gt;
+&lt;p&gt;为了保存在github上，直接创建一个github的仓库，名字就是&lt;code&gt;&amp;lt;github用户名&amp;gt;.github.io&lt;/code&gt;，比如我的就是&lt;code&gt;f0ghua.github.io&lt;/code&gt;。注意必须按照这个规则来命名，否则将无法访问。
+然后在本地创建目录&lt;code&gt;f0ghua.github.io&lt;/code&gt;，&lt;/p&gt;
+&lt;pre class="code literal-block"&gt;cd f0ghua.github.io
+git init
+git remote add origin https://github.com/f0ghua/f0ghua.github.io.git
+&lt;/pre&gt;
+&lt;p&gt;按照nikola的官方说明，默认的nikola配置文件会把源码保存在branch src上，depoly的输出保存在master分支。因此，我们创建src分支，来存放源码。&lt;/p&gt;
+&lt;pre class="code literal-block"&gt;git checkout -b src
+&lt;/pre&gt;
+&lt;p&gt;通过nikola命令生成基本的框架，然后复制到f0ghua.github.io目录中去。&lt;/p&gt;
+&lt;pre class="code literal-block"&gt;nikola init mysite
+&lt;/pre&gt;
+&lt;p&gt;添加.gitignore文件以忽略deploy过程中生成的文件&lt;/p&gt;
+&lt;pre class="code literal-block"&gt;&lt;span class="nf"&gt;cache&lt;/span&gt;
+&lt;span class="na"&gt;.doit.db&lt;/span&gt;
+&lt;span class="nf"&gt;__pycache__&lt;/span&gt;
+&lt;span class="nf"&gt;output&lt;/span&gt;
+&lt;/pre&gt;
+&lt;p&gt;最后，在f0ghua.github.io目录执行以下命令生成静态网页发布到master分支&lt;/p&gt;
+&lt;pre class="code literal-block"&gt;nikola github_deploy
+&lt;/pre&gt;
+&lt;p&gt;这样，访问&lt;code&gt;f0ghua.github.io&lt;/code&gt;就能看到blog页面了。&lt;/p&gt;
+&lt;h3&gt;Reference&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://getnikola.com/getting-started.html#"&gt;Nikola Getting Started&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://getnikola.com/handbook.html#deployment"&gt;The Nikola Handbook - Deploying to GitHub&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://getnikola.com/blog/automating-nikola-rebuilds-with-travis-ci.html"&gt;Automating Nikola rebuilds with Travis CI&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/div&gt;</description><guid>https://example.com/posts/shi-yong-nikolachuang-jian-ge-ren-bo-ke/</guid><pubDate>Mon, 22 Feb 2021 12:12:13 GMT</pubDate></item></channel></rss>
