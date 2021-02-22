@@ -14,12 +14,13 @@
 <meta property="og:site_name" content="fog's blog">
 <meta property="og:title" content="使用Nikola创建个人博客">
 <meta property="og:url" content="https://example.com/posts/shi-yong-nikolachuang-jian-ge-ren-bo-ke/">
-<meta property="og:description" content="github配置
-为了保存在github上，直接创建一个github的仓库，名字就是&lt;github用户名&gt;.github.io，比如我的就是f0ghua.github.io。注意必须按照这个规则来命名，否则将无法访问。
-然后在本地创建目录f0ghua.github.io，
-cd f0ghua.github.io
-git init
-git remote add origin https://gith">
+<meta property="og:description" content="Windows
+安装
+我Windows机器上用的是winpython3.8.7，按照Nikola的官方文档Getting Started，在winpython的命令窗口中输入以下命令进行安装：
+# path D:\xPortable\Tools\python\WPy32-3870\scripts&gt;
+&gt; python -m venv nikola
+&gt; cd nikola
+&gt; Scripts\acti">
 <meta property="og:type" content="article">
 <meta property="article:published_time" content="2021-02-22T20:12:13+08:00">
 </head>
@@ -97,6 +98,19 @@ git remote add origin https://gith">
 
     </header><div class="e-content entry-content" itemprop="articleBody text">
     <div>
+<h3>Windows</h3>
+<h4>安装</h4>
+<p>我Windows机器上用的是winpython3.8.7，按照Nikola的官方文档<code>Getting Started</code>，在winpython的命令窗口中输入以下命令进行安装：</p>
+<pre class="code literal-block"><span class="c1"># path D:\xPortable\Tools\python\WPy32-3870\scripts&gt;</span>
+&gt; python -m venv nikola
+&gt; <span class="nb">cd</span> nikola
+&gt; Scripts<span class="se">\a</span>ctivate
+&gt; Scripts<span class="se">\p</span>ython -m pip install -U pip setuptools wheel
+&gt; Scripts<span class="se">\p</span>ython -m pip install -U <span class="s2">"Nikola"</span>
+...snip...
+Successfully installed Nikola
+</pre>
+<p>需要注意的是venv的目录必须在scripts下面创建，不能生成在别处，否则venv的路径会不对。</p>
 <h4>github配置</h4>
 <p>为了保存在github上，直接创建一个github的仓库，名字就是<code>&lt;github用户名&gt;.github.io</code>，比如我的就是<code>f0ghua.github.io</code>。注意必须按照这个规则来命名，否则将无法访问。
 然后在本地创建目录<code>f0ghua.github.io</code>，</p>
