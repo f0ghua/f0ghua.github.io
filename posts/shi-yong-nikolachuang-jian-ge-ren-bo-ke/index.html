@@ -11,16 +11,23 @@
 <link rel="alternate" type="application/rss+xml" title="RSS" hreflang="zh_cn" href="../../rss.xml">
 <link rel="canonical" href="https://example.com/posts/shi-yong-nikolachuang-jian-ge-ren-bo-ke/">
 <!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><meta name="author" content="fog hua">
+<link rel="next" href="../qtde-impl/" title="Qt的Impl" type="text/html">
 <meta property="og:site_name" content="fog's blog">
 <meta property="og:title" content="使用Nikola创建个人博客">
 <meta property="og:url" content="https://example.com/posts/shi-yong-nikolachuang-jian-ge-ren-bo-ke/">
 <meta property="og:description" content="Windows
 安装
+github配置
+
+
+Reference
+
+
+Windows
+安装
 我Windows机器上用的是winpython3.8.7，按照Nikola的官方文档Getting Started，在winpython的命令窗口中输入以下命令进行安装：
 # path D:\xPortable\Tools\python\WPy32-3870\scripts&gt;
-&gt; python -m venv nikola
-&gt; cd nikola
-&gt; Scripts\acti">
+&gt; python -m venv">
 <meta property="og:type" content="article">
 <meta property="article:published_time" content="2021-02-22T20:12:13+08:00">
 </head>
@@ -98,8 +105,19 @@
 
     </header><div class="e-content entry-content" itemprop="articleBody text">
     <div>
-<h3>Windows</h3>
-<h4>安装</h4>
+<div class="toc">
+<ul>
+<li>
+<a href="#windows">Windows</a><ul>
+<li><a href="#_1">安装</a></li>
+<li><a href="#github">github配置</a></li>
+</ul>
+</li>
+<li><a href="#reference">Reference</a></li>
+</ul>
+</div>
+<h3 id="windows">Windows</h3>
+<h4 id="_1">安装</h4>
 <p>我Windows机器上用的是winpython3.8.7，按照Nikola的官方文档<code>Getting Started</code>，在winpython的命令窗口中输入以下命令进行安装：</p>
 <pre class="code literal-block"><span class="c1"># path D:\xPortable\Tools\python\WPy32-3870\scripts&gt;</span>
 &gt; python -m venv nikola
@@ -111,7 +129,7 @@
 Successfully installed Nikola
 </pre>
 <p>需要注意的是venv的目录必须在scripts下面创建，不能生成在别处，否则venv的路径会不对。</p>
-<h4>github配置</h4>
+<h4 id="github">github配置</h4>
 <p>为了保存在github上，直接创建一个github的仓库，名字就是<code>&lt;github用户名&gt;.github.io</code>，比如我的就是<code>f0ghua.github.io</code>。注意必须按照这个规则来命名，否则将无法访问。
 然后在本地创建目录<code>f0ghua.github.io</code>，</p>
 <pre class="code literal-block">cd f0ghua.github.io
@@ -134,7 +152,7 @@ git remote add origin https://github.com/f0ghua/f0ghua.github.io.git
 <pre class="code literal-block">nikola github_deploy
 </pre>
 <p>这样，访问<code>f0ghua.github.io</code>就能看到blog页面了。</p>
-<h3>Reference</h3>
+<h3 id="reference">Reference</h3>
 <ul>
 <li><a href="https://getnikola.com/getting-started.html#">Nikola Getting Started</a></li>
 <li><a href="https://getnikola.com/handbook.html#deployment">The Nikola Handbook - Deploying to GitHub</a></li>
@@ -142,7 +160,11 @@ git remote add origin https://github.com/f0ghua/f0ghua.github.io.git
 </ul>
 </div>
     </div>
-    <aside class="postpromonav"><nav></nav></aside></article><!--End of body content--><footer id="footer">
+    <aside class="postpromonav"><nav><ul class="pager hidden-print">
+<li class="next">
+                <a href="../qtde-impl/" rel="next" title="Qt的Impl">下一篇文章</a>
+            </li>
+        </ul></nav></aside></article><!--End of body content--><footer id="footer">
             Contents © 2021         <a href="mailto:fog.hua@gmail.com">fog hua</a> - Powered by         <a href="https://getnikola.com" rel="nofollow">Nikola</a>         
             
             
