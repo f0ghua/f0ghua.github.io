@@ -9,6 +9,8 @@
 .. type: text
 -->
 
+[TOC]
+
 ## Windows
 ### 安装
 我Windows机器上用的是winpython3.8.7，按照Nikola的官方文档`Getting Started`，在winpython的命令窗口中输入以下命令进行安装：
