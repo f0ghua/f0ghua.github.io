@@ -12,8 +12,11 @@
 [TOC]
 
 在Qt中，大多数的类在设计的时候都把具体的数据处理放在一个Private类中，这样做有几个好处：
+
 - 能保证二进制兼容性（关于二进制兼容型,可以参考[Policies/Binary Compatibility Issues With C++](https://community.kde.org/Policies/Binary_Compatibility_Issues_With_C%2B%2B)），就是发布库的时候可以尽量保持跟以前版本的兼容，不至于因为添加了某些成员变量导致原来调用库的程序奔溃；
+
 - 在编译的时候不用因为修改了一点东西，而影响太多的文件
+
 - d指针的实现方法并不限于QObject的子类
 
 ## 注意事项

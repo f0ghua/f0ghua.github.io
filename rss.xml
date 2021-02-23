@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<?xml-stylesheet type="text/xsl" href="assets/xml/rss.xsl" media="all"?><rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>fog's blog</title><link>https://example.com/</link><description>This is a demo site for Nikola.</description><atom:link href="https://example.com/rss.xml" rel="self" type="application/rss+xml"></atom:link><language>zh_cn</language><copyright>Contents © 2021 &lt;a href="mailto:fog.hua@gmail.com"&gt;fog hua&lt;/a&gt; </copyright><lastBuildDate>Tue, 23 Feb 2021 12:57:32 GMT</lastBuildDate><generator>Nikola (getnikola.com)</generator><docs>http://blogs.law.harvard.edu/tech/rss</docs><item><title>Qt的Impl</title><link>https://example.com/posts/qtde-impl/</link><dc:creator>fog hua</dc:creator><description>&lt;div&gt;&lt;div class="toc"&gt;
+<?xml-stylesheet type="text/xsl" href="assets/xml/rss.xsl" media="all"?><rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>fog's blog</title><link>https://example.com/</link><description>This is a demo site for Nikola.</description><atom:link href="https://example.com/rss.xml" rel="self" type="application/rss+xml"></atom:link><language>zh_cn</language><copyright>Contents © 2021 &lt;a href="mailto:fog.hua@gmail.com"&gt;fog hua&lt;/a&gt; </copyright><lastBuildDate>Tue, 23 Feb 2021 13:02:32 GMT</lastBuildDate><generator>Nikola (getnikola.com)</generator><docs>http://blogs.law.harvard.edu/tech/rss</docs><item><title>Qt的Impl</title><link>https://example.com/posts/qtde-impl/</link><dc:creator>fog hua</dc:creator><description>&lt;div&gt;&lt;div class="toc"&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://example.com/posts/qtde-impl/#_1"&gt;注意事项&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://example.com/posts/qtde-impl/#_2"&gt;实例说明&lt;/a&gt;&lt;ul&gt;
@@ -11,10 +11,18 @@
 &lt;li&gt;&lt;a href="https://example.com/posts/qtde-impl/#_3"&gt;参考&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
-&lt;p&gt;在Qt中，大多数的类在设计的时候都把具体的数据处理放在一个Private类中，这样做有几个好处：
-- 能保证二进制兼容性（关于二进制兼容型,可以参考&lt;a href="https://community.kde.org/Policies/Binary_Compatibility_Issues_With_C%2B%2B"&gt;Policies/Binary Compatibility Issues With C++&lt;/a&gt;），就是发布库的时候可以尽量保持跟以前版本的兼容，不至于因为添加了某些成员变量导致原来调用库的程序奔溃；
-- 在编译的时候不用因为修改了一点东西，而影响太多的文件
-- d指针的实现方法并不限于QObject的子类&lt;/p&gt;
+&lt;p&gt;在Qt中，大多数的类在设计的时候都把具体的数据处理放在一个Private类中，这样做有几个好处：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;能保证二进制兼容性（关于二进制兼容型,可以参考&lt;a href="https://community.kde.org/Policies/Binary_Compatibility_Issues_With_C%2B%2B"&gt;Policies/Binary Compatibility Issues With C++&lt;/a&gt;），就是发布库的时候可以尽量保持跟以前版本的兼容，不至于因为添加了某些成员变量导致原来调用库的程序奔溃；&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;在编译的时候不用因为修改了一点东西，而影响太多的文件&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;d指针的实现方法并不限于QObject的子类&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
 &lt;h3 id="_1"&gt;注意事项&lt;/h3&gt;
 &lt;p&gt;D-Pointer这样的写法好处是显而易见的，但是也带来了一些问题，因此，我们在设计的时候需要注意&lt;/p&gt;
 &lt;ul&gt;
