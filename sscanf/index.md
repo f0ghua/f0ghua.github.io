@@ -13,7 +13,7 @@ int sscanf(const char *str, const char *format, ...);
 
 这里 format 可以是一个或者多个
 
-`{%[*][width][{h|l|I64|L}]type | ' ' | '\t' |'\n' | 非%符号}`
+`{\\%[*][width][{h|l|I64|L}]type | ' ' | '\t' |'\n' | 非\\%符号}`
 
 其中
 
