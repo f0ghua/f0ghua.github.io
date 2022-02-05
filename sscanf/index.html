@@ -6,17 +6,17 @@
         <meta name="robots" content="noodp" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
         <title>c语言常用库函数-sscanf - LoveIt</title><meta name="Description" content="关于 LoveIt 主题"><meta property="og:title" content="c语言常用库函数-sscanf" />
-<meta property="og:description" content="函数原型 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 #include &lt;stdio.h&gt; /* 这里format可以是一个或者多个 {%[*][width][{h|l|I64|L}]type | &#39; &#39; | &#39;\t&#39; | &#39;\n&#39; | 非%符号} * 添加则表示满足条件的被过滤 width" />
+<meta property="og:description" content="函数原型 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 #include &lt;stdio.h&gt; /* 这里format可以是一个或者多个 ={%[*][width][{h|l|I64|L}]type | &#39; &#39; | &#39;\t&#39; | &#39;\n&#39; | 非%符号}= * 添加则表示满足条件的被过滤" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://example.com/sscanf/" /><meta property="og:image" content="https://example.com/logo.png"/><meta property="article:section" content="posts" />
 <meta property="article:published_time" content="2022-02-05T20:13:00+08:00" />
-<meta property="article:modified_time" content="2022-02-05T20:16:51+08:00" />
+<meta property="article:modified_time" content="2022-02-05T22:52:51+08:00" />
 
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:image" content="https://example.com/logo.png"/>
 
 <meta name="twitter:title" content="c语言常用库函数-sscanf"/>
-<meta name="twitter:description" content="函数原型 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 #include &lt;stdio.h&gt; /* 这里format可以是一个或者多个 {%[*][width][{h|l|I64|L}]type | &#39; &#39; | &#39;\t&#39; | &#39;\n&#39; | 非%符号} * 添加则表示满足条件的被过滤 width"/>
+<meta name="twitter:description" content="函数原型 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 #include &lt;stdio.h&gt; /* 这里format可以是一个或者多个 ={%[*][width][{h|l|I64|L}]type | &#39; &#39; | &#39;\t&#39; | &#39;\n&#39; | 非%符号}= * 添加则表示满足条件的被过滤"/>
 <meta name="application-name" content="LoveIt">
 <meta name="apple-mobile-web-app-title" content="LoveIt"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -29,8 +29,8 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "https:\/\/example.com\/sscanf\/"
-        },"image": ["https:\/\/example.com\/images\/Apple-Devices-Preview.png"],"genre": "posts","keywords": "c","wordcount":  892 ,
-        "url": "https:\/\/example.com\/sscanf\/","datePublished": "2022-02-05T20:13:00+08:00","dateModified": "2022-02-05T20:16:51+08:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
+        },"image": ["https:\/\/example.com\/images\/Apple-Devices-Preview.png"],"genre": "posts","keywords": "c","wordcount":  978 ,
+        "url": "https:\/\/example.com\/sscanf\/","datePublished": "2022-02-05T20:13:00+08:00","dateModified": "2022-02-05T22:52:51+08:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
             "@type": "Organization",
             "name": "xxxx","logo": "https:\/\/example.com\/images\/avatar.png"},"author": {
                 "@type": "Person",
@@ -110,7 +110,7 @@
             <div class="toc-content" id="toc-content-auto"></div>
         </div><article class="page single"><h1 class="single-title animated flipInX">c语言常用库函数-sscanf</h1><div class="post-meta">
             <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>fog</a></span>&nbsp;<span class="post-category">收录于 <a href="/categories/programming/"><i class="far fa-folder fa-fw"></i>programming</a></span></div>
-            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-02-05">2022-02-05</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 892 字&nbsp;
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-02-05">2022-02-05</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 978 字&nbsp;
                 <i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 2 分钟&nbsp;</div>
         </div><div class="details toc" id="toc-static"  kept="">
                 <div class="details-summary toc-title">
@@ -161,7 +161,7 @@
 </span><span class="cp"></span>
 <span class="cm">/*
 </span><span class="cm"> 这里format可以是一个或者多个
-</span><span class="cm">  {%[*][width][{h|l|I64|L}]type | &#39; &#39; | &#39;\t&#39; | &#39;\n&#39; | 非%符号}
+</span><span class="cm">  ={%[*][width][{h|l|I64|L}]type | &#39; &#39; | &#39;\t&#39; | &#39;\n&#39; | 非%符号}=
 </span><span class="cm">
 </span><span class="cm">  *     添加则表示满足条件的被过滤
 </span><span class="cm">  width 表示宽度
@@ -175,7 +175,44 @@
 
 </code></pre></td></tr></table>
 </div>
-</div><h2 id="用法分析">用法分析</h2>
+</div><p>这里 format 可以是一个或者多个</p>
+<p><code>{%[*][width][{h|l|I64|L}]type | ' ' | '\t' |'\n' | 非%符号}</code></p>
+<p>其中</p>
+<table>
+<thead>
+<tr>
+<th>*</th>
+<th>添加则表示满足条件的被过滤</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>width</td>
+<td>表示宽度</td>
+</tr>
+<tr>
+<td>h</td>
+<td>表示单字节</td>
+</tr>
+<tr>
+<td>l</td>
+<td>表示双字节</td>
+</tr>
+<tr>
+<td>L</td>
+<td>表示 4 个字节</td>
+</tr>
+<tr>
+<td>I64</td>
+<td>表示 8 个字节</td>
+</tr>
+<tr>
+<td>type</td>
+<td>如 s, d 之类，表示字符串等</td>
+</tr>
+</tbody>
+</table>
+<h2 id="用法分析">用法分析</h2>
 <h3 id="基本用法">基本用法</h3>
 <p>sscanf 一般用来从一个 ascii 字符串中读取一些值，基本用法很简单。例如</p>
 <div class="highlight"><div class="chroma">
