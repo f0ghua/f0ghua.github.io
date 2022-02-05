@@ -7,18 +7,6 @@
 
 #include <stdio.h>
 
-/*
- 这里format可以是一个或者多个
-  ={%[*][width][{h|l|I64|L}]type | ' ' | '\t' | '\n' | 非%符号}=
-
-  *     添加则表示满足条件的被过滤
-  width 表示宽度
-  h     表示单字节
-  l     表示双字节
-  L     表示4个字节
-  I64   表示8个字节
-  type  如s, d之类，表示字符串等
-*/
 int sscanf(const char *str, const char *format, ...);
 
 ```
