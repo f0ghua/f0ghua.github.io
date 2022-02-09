@@ -17,8 +17,7 @@ int snprintf(char *str, size_t size, const char *format, ...);
 
 ## 用法分析 {#用法分析}
 
-snprintf 和 sprintf 不同的是，当缓冲区不够用时，snprintf 会返回一个大于等于 n 的值，出
-错时返回一个负值。因此，当返回值是一个不大于 n-1 的非负值时，它可以保证缓冲区是以
+snprintf 和 sprintf 不同的是，当缓冲区不够用时，snprintf 会返回一个大于等于 n 的值，出错时返回一个负值。因此，当返回值是一个不大于 n-1 的非负值时，它可以保证缓冲区是以
 NUL 结尾。
 
 snprintf 的正确用法:
@@ -44,8 +43,7 @@ int main(int argc,char **argv)
 
 ## 注意事项 {#注意事项}
 
-不管是 sprintf 还是 snprintf，在使用的时候必须注意被拷贝的字串于作为参数的字串不能
-相同，因为这会导致不可预知的返回值。例如：
+不管是 sprintf 还是 snprintf，在使用的时候必须注意被拷贝的字串于作为参数的字串不能相同，因为这会导致不可预知的返回值。例如：
 
 ```c
 #include <stdio.h>

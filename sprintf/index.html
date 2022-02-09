@@ -5,32 +5,32 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="robots" content="noodp" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
-        <title>C 语言常用库函数-snprintf - Fog&#39;s Blog</title><meta name="Description" content="Technology sharing"><meta property="og:title" content="C 语言常用库函数-snprintf" />
-<meta property="og:description" content="函数原型 1 2 3 4 5 6 7 8 #include &lt;stdio.h&gt;/* 函数说明: 最多从源串中拷贝size－1个字符到目标串中，然后再在后面加一个0。所 以如果目标串的大小为size的话" />
+        <title>C 语言常用库函数-sprintf - Fog&#39;s Blog</title><meta name="Description" content="Technology sharing"><meta property="og:title" content="C 语言常用库函数-sprintf" />
+<meta property="og:description" content="函数原型 1 2 3 4 5 6 7 8 #include &lt;stdio.h&gt; /* 函数说明: 按照format指定的格式填充字符串str，以 &#39;\0&#39; 结尾。 函数返回值: 若成功则返回存入数组的字符数，若编" />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://example.com/snprintf/" /><meta property="og:image" content="https://example.com/logo.png"/><meta property="article:section" content="posts" />
-<meta property="article:published_time" content="2022-02-05T00:00:00+00:00" />
+<meta property="og:url" content="https://example.com/sprintf/" /><meta property="og:image" content="https://example.com/logo.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2022-02-07T00:00:00+00:00" />
 <meta property="article:modified_time" content="2022-02-07T13:46:48+08:00" />
 
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:image" content="https://example.com/logo.png"/>
 
-<meta name="twitter:title" content="C 语言常用库函数-snprintf"/>
-<meta name="twitter:description" content="函数原型 1 2 3 4 5 6 7 8 #include &lt;stdio.h&gt;/* 函数说明: 最多从源串中拷贝size－1个字符到目标串中，然后再在后面加一个0。所 以如果目标串的大小为size的话"/>
+<meta name="twitter:title" content="C 语言常用库函数-sprintf"/>
+<meta name="twitter:description" content="函数原型 1 2 3 4 5 6 7 8 #include &lt;stdio.h&gt; /* 函数说明: 按照format指定的格式填充字符串str，以 &#39;\0&#39; 结尾。 函数返回值: 若成功则返回存入数组的字符数，若编"/>
 <meta name="application-name" content="Fog&#39;s Blog">
 <meta name="apple-mobile-web-app-title" content="Fog&#39;s Blog"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://example.com/snprintf/" /><link rel="next" href="https://example.com/toeic_experience/" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css"><script type="application/ld+json">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://example.com/sprintf/" /><link rel="prev" href="https://example.com/strcpy/" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css"><script type="application/ld+json">
     {
         "@context": "http://schema.org",
         "@type": "BlogPosting",
-        "headline": "C 语言常用库函数-snprintf",
+        "headline": "C 语言常用库函数-sprintf",
         "inLanguage": "zh-CN",
         "mainEntityOfPage": {
             "@type": "WebPage",
-            "@id": "https:\/\/example.com\/snprintf\/"
-        },"image": ["https:\/\/example.com\/images\/Apple-Devices-Preview.png"],"genre": "posts","keywords": "c, 格式化输入输出","wordcount":  438 ,
-        "url": "https:\/\/example.com\/snprintf\/","datePublished": "2022-02-05T00:00:00+00:00","dateModified": "2022-02-07T13:46:48+08:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
+            "@id": "https:\/\/example.com\/sprintf\/"
+        },"image": ["https:\/\/example.com\/images\/Apple-Devices-Preview.png"],"genre": "posts","keywords": "c, 格式化输入输出","wordcount":  209 ,
+        "url": "https:\/\/example.com\/sprintf\/","datePublished": "2022-02-07T00:00:00+00:00","dateModified": "2022-02-07T13:46:48+08:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
             "@type": "Organization",
             "name": "xxxx","logo": "https:\/\/example.com\/images\/avatar.png"},"author": {
                 "@type": "Person",
@@ -47,7 +47,7 @@
         </div>
         <div class="menu">
             <div class="menu-inner"><a class="menu-item" href="/posts/"> 所有文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><a class="menu-item" href="/categories/documentation/"> 文档 </a><a class="menu-item" href="/about/"> 关于 </a><a class="menu-item" href="https://github.com/dillonzq/LoveIt" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><a href="javascript:void(0);" class="menu-item language" title="选择语言">简体中文<i class="fas fa-chevron-right fa-fw"></i>
-                        <select class="language-select" id="language-select-desktop" onchange="location = this.value;"><option value="/snprintf/" selected>简体中文</option></select>
+                        <select class="language-select" id="language-select-desktop" onchange="location = this.value;"><option value="/sprintf/" selected>简体中文</option></select>
                     </a><span class="menu-item search" id="search-desktop">
                         <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
                         <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
@@ -94,7 +94,7 @@
                 </div><a class="menu-item" href="/posts/" title="">所有文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a class="menu-item" href="/categories/documentation/" title="">文档</a><a class="menu-item" href="/about/" title="">关于</a><a class="menu-item" href="https://github.com/dillonzq/LoveIt" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
                 <i class="fas fa-adjust fa-fw"></i>
             </a><a href="javascript:void(0);" class="menu-item" title="选择语言">简体中文<i class="fas fa-chevron-right fa-fw"></i>
-                    <select class="language-select" onchange="location = this.value;"><option value="/snprintf/" selected>简体中文</option></select>
+                    <select class="language-select" onchange="location = this.value;"><option value="/sprintf/" selected>简体中文</option></select>
                 </a></div>
     </div>
 </header>
@@ -108,9 +108,9 @@
                 <div class="container"><div class="toc" id="toc-auto">
             <h2 class="toc-title">目录</h2>
             <div class="toc-content" id="toc-content-auto"></div>
-        </div><article class="page single"><h1 class="single-title animated flipInX">C 语言常用库函数-snprintf</h1><div class="post-meta">
+        </div><article class="page single"><h1 class="single-title animated flipInX">C 语言常用库函数-sprintf</h1><div class="post-meta">
             <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>fog</a></span>&nbsp;<span class="post-category">收录于 <a href="/categories/programming/"><i class="far fa-folder fa-fw"></i>programming</a></span></div>
-            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-02-05">2022-02-05</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 438 字&nbsp;
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-02-07">2022-02-07</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 209 字&nbsp;
                 <i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 1 分钟&nbsp;</div>
         </div><div class="details toc" id="toc-static"  kept="">
                 <div class="details-summary toc-title">
@@ -138,99 +138,21 @@
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
-</span><span class="cp"></span><span class="cm">/*
-</span><span class="cm">函数说明:   最多从源串中拷贝size－1个字符到目标串中，然后再在后面加一个0。所
-</span><span class="cm">           以如果目标串的大小为size的话，将不会溢出。
+</span><span class="cp"></span>
+<span class="cm">/*
+</span><span class="cm">函数说明:   按照format指定的格式填充字符串str，以 &#39;\0&#39; 结尾。
 </span><span class="cm">函数返回值: 若成功则返回存入数组的字符数，若编码出错则返回负值。
 </span><span class="cm">*/</span>
-<span class="kt">int</span> <span class="nf">snprintf</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">str</span><span class="p">,</span> <span class="n">size_t</span> <span class="n">size</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">format</span><span class="p">,</span> <span class="p">...);</span>
+<span class="kt">int</span> <span class="nf">sprintf</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">str</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">format</span><span class="p">,</span> <span class="p">...);</span>
 
 </code></pre></td></tr></table>
 </div>
 </div><h2 id="用法分析">用法分析</h2>
-<p>snprintf 和 sprintf 不同的是，当缓冲区不够用时，snprintf 会返回一个大于等于 n 的值，出错时返回一个负值。因此，当返回值是一个不大于 n-1 的非负值时，它可以保证缓冲区是以
-NUL 结尾。</p>
-<p>snprintf 的正确用法:</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
-</span><span class="cp"></span>
-<span class="cp">#define BUFSIZ 16
-</span><span class="cp"></span>
-<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span><span class="kt">char</span> <span class="o">**</span><span class="n">argv</span><span class="p">)</span>
-<span class="p">{</span>
-    <span class="kt">char</span> <span class="n">buf</span><span class="p">[</span><span class="n">BUFSIZ</span><span class="p">];</span>
-
-    <span class="cm">/* 注意这里长度不需要用sizeof(buf)-1，因为snprintf只会拷贝size-1个字节，
-</span><span class="cm">     * 并自己加上NULL结尾
-</span><span class="cm">     */</span>
-    <span class="n">snprintf</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">buf</span><span class="p">),</span> <span class="s">&#34;%s&#34;</span><span class="p">,</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
-
-    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-<span class="p">}</span>
-</code></pre></td></tr></table>
-</div>
-</div><h2 id="注意事项">注意事项</h2>
-<p>不管是 sprintf 还是 snprintf，在使用的时候必须注意被拷贝的字串于作为参数的字串不能相同，因为这会导致不可预知的返回值。例如：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
-</span><span class="cp"></span>
-<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">argv</span><span class="p">)</span>
-<span class="p">{</span>
-    <span class="kt">char</span> <span class="n">str</span><span class="p">[</span><span class="mi">16</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#34;hello&#34;</span><span class="p">;</span>
-
-    <span class="n">snprintf</span><span class="p">(</span><span class="n">str</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">str</span><span class="p">),</span> <span class="s">&#34;%s-%d&#34;</span><span class="p">,</span> <span class="n">str</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
-
-    <span class="n">printf</span><span class="p">(</span><span class="s">&#34;%s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">str</span><span class="p">);</span>
-
-    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-<span class="p">}</span>
-</code></pre></td></tr></table>
-</div>
-</div><p>参考 <a href="https://pubs.opengroup.org/onlinepubs/000095399/functions/printf.html" target="_blank" rel="noopener noreffer">这份资料</a></p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">If copying takes place between objects that overlap as a result of a call to
-sprintf<span class="o">()</span> or snprintf<span class="o">()</span>, the results are undefined.
-</code></pre></td></tr></table>
-</div>
-</div></div><div class="post-footer" id="post-footer">
+<p>sprintf 一般用来把其他类型的数据转换成字符数组储存。它会自动在所写入字符组的末尾加上 NUL 字符来表示字符串的结束，NUL 字符不被计入返回值。</p>
+<p>sprintf 和 strcpy 一样，属于无边界检查的一类函数，不建议使用。</p>
+<h2 id="注意事项">注意事项</h2>
+<p>对于新写的代码，请抛弃 sprintf，用 snprintf 代替。</p>
+</div><div class="post-footer" id="post-footer">
     <div class="post-info">
         <div class="post-info-line">
             <div class="post-info-mod">
@@ -240,10 +162,10 @@ sprintf<span class="o">()</span> or snprintf<span class="o">()</span>, the resul
         </div>
         <div class="post-info-line">
             <div class="post-info-md"><span>
-                            <a class="link-to-markdown" href="/snprintf/index.md" target="_blank">阅读原始文档</a>
+                            <a class="link-to-markdown" href="/sprintf/index.md" target="_blank">阅读原始文档</a>
                         </span></div>
             <div class="post-info-share">
-                <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://example.com/snprintf/" data-title="C 语言常用库函数-snprintf" data-hashtags="c,格式化输入输出"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://example.com/snprintf/" data-hashtag="c"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Hacker News" data-sharer="hackernews" data-url="https://example.com/snprintf/" data-title="C 语言常用库函数-snprintf"><i class="fab fa-hacker-news fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://example.com/snprintf/" data-title="C 语言常用库函数-snprintf"><i data-svg-src="https://cdn.jsdelivr.net/npm/simple-icons@2.14.0/icons/line.svg"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://example.com/snprintf/" data-title="C 语言常用库函数-snprintf"><i class="fab fa-weibo fa-fw"></i></a></span>
+                <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://example.com/sprintf/" data-title="C 语言常用库函数-sprintf" data-hashtags="c,格式化输入输出"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://example.com/sprintf/" data-hashtag="c"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Hacker News" data-sharer="hackernews" data-url="https://example.com/sprintf/" data-title="C 语言常用库函数-sprintf"><i class="fab fa-hacker-news fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://example.com/sprintf/" data-title="C 语言常用库函数-sprintf"><i data-svg-src="https://cdn.jsdelivr.net/npm/simple-icons@2.14.0/icons/line.svg"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://example.com/sprintf/" data-title="C 语言常用库函数-sprintf"><i class="fab fa-weibo fa-fw"></i></a></span>
             </div>
         </div>
     </div>
@@ -255,8 +177,7 @@ sprintf<span class="o">()</span> or snprintf<span class="o">()</span>, the resul
         </section>
     </div>
 
-    <div class="post-nav">
-            <a href="/toeic_experience/" class="next" rel="next" title="托业考试经验分享">托业考试经验分享<i class="fas fa-angle-right fa-fw"></i></a></div>
+    <div class="post-nav"><a href="/strcpy/" class="prev" rel="prev" title="C 语言常用库函数-strcpy"><i class="fas fa-angle-left fa-fw"></i>C 语言常用库函数-strcpy</a></div>
 </div>
 <div id="comments"><div id="utterances"></div><noscript>
                 Please enable JavaScript to view the comments powered by <a href="https://utteranc.es/">Utterances</a>.
