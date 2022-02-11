@@ -1,51 +1,51 @@
 <rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
     <channel>
         <title>Fog&#39;s Blog</title>
-        <link>https://example.com/</link>
+        <link>https://f0ghua.github.io/</link>
         <description>Technology sharing</description>
         <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Mon, 07 Feb 2022 00:00:00 &#43;0000</lastBuildDate>
-            <atom:link href="https://example.com/index.xml" rel="self" type="application/rss+xml" />
+            <atom:link href="https://f0ghua.github.io/index.xml" rel="self" type="application/rss+xml" />
         <item>
     <title>C 语言常用库函数-sprintf</title>
-    <link>https://example.com/sprintf/</link>
+    <link>https://f0ghua.github.io/sprintf/</link>
     <pubDate>Mon, 07 Feb 2022 00:00:00 &#43;0000</pubDate>
     <author>作者</author>
-    <guid>https://example.com/sprintf/</guid>
+    <guid>https://f0ghua.github.io/sprintf/</guid>
     <description><![CDATA[函数原型 1 2 3 4 5 6 7 8 #include &lt;stdio.h&gt; /* 函数说明: 按照format指定的格式填充字符串str，以 &#39;\0&#39; 结尾。 函数返回值: 若成功则返回存入数组的字符数，若编]]></description>
 </item><item>
     <title>C 语言常用库函数-strcpy</title>
-    <link>https://example.com/strcpy/</link>
+    <link>https://f0ghua.github.io/strcpy/</link>
     <pubDate>Mon, 07 Feb 2022 00:00:00 &#43;0000</pubDate>
     <author>作者</author>
-    <guid>https://example.com/strcpy/</guid>
+    <guid>https://f0ghua.github.io/strcpy/</guid>
     <description><![CDATA[函数原型 1 2 3 #include &lt;string.h&gt; char *strcpy(char *dest, const char *src); 用法分析 strcpy 属于无边界检查的一类函数，因此使用起来十分的危险，在标准文档中已经不建议使用。 无边界检查很容易就会发]]></description>
 </item><item>
     <title>C 语言常用库函数-strncpy</title>
-    <link>https://example.com/strncpy/</link>
+    <link>https://f0ghua.github.io/strncpy/</link>
     <pubDate>Mon, 07 Feb 2022 00:00:00 &#43;0000</pubDate>
     <author>作者</author>
-    <guid>https://example.com/strncpy/</guid>
+    <guid>https://f0ghua.github.io/strncpy/</guid>
     <description><![CDATA[函数原型 1 2 3 #include &lt;string.h&gt; char *strncpy(char *dest, const char *src, size_t n); 用法分析 strncpy 由于添加了长度限制，避免了缓冲区溢出的问题。但在使用这个函数的时候必须要注意: strncpy 只有在源字符串的]]></description>
 </item><item>
     <title>C语言常用库函数-sscanf</title>
-    <link>https://example.com/sscanf/</link>
+    <link>https://f0ghua.github.io/sscanf/</link>
     <pubDate>Sat, 05 Feb 2022 20:13:00 &#43;0800</pubDate>
     <author>作者</author>
-    <guid>https://example.com/sscanf/</guid>
+    <guid>https://f0ghua.github.io/sscanf/</guid>
     <description><![CDATA[函数原型 1 2 3 4 5 #include &lt;stdio.h&gt; int sscanf(const char *str, const char *format, ...); 这里 format 可以是一个或者多个 { %[*][width][{h|l|I64|L}]type | ' ' | '\t' | '\n' | 非%符号 } 其中 符号 说明 * 添加则表示满足条件的被过滤 width 表示宽]]></description>
 </item><item>
     <title>托业考试经验分享</title>
-    <link>https://example.com/toeic_experience/</link>
+    <link>https://f0ghua.github.io/toeic_experience/</link>
     <pubDate>Sat, 05 Feb 2022 19:17:00 &#43;0800</pubDate>
     <author>作者</author>
-    <guid>https://example.com/toeic_experience/</guid>
+    <guid>https://f0ghua.github.io/toeic_experience/</guid>
     <description><![CDATA[概述 由于新公司的国外业务占比很高，因此要求托业要过 600 才行。所以入职后前后参加了 2 次考试，分别为 2021.8.24 和 2022.1.16 月份。第一次考了 560 分（250/310），]]></description>
 </item><item>
     <title>C 语言常用库函数-snprintf</title>
-    <link>https://example.com/snprintf/</link>
+    <link>https://f0ghua.github.io/snprintf/</link>
     <pubDate>Sat, 05 Feb 2022 00:00:00 &#43;0000</pubDate>
     <author>作者</author>
-    <guid>https://example.com/snprintf/</guid>
+    <guid>https://f0ghua.github.io/snprintf/</guid>
     <description><![CDATA[函数原型 1 2 3 4 5 6 7 8 #include &lt;stdio.h&gt;/* 函数说明: 最多从源串中拷贝size－1个字符到目标串中，然后再在后面加一个0。所 以如果目标串的大小为size的话]]></description>
 </item></channel>
 </rss>

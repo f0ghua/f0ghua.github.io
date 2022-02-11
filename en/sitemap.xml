@@ -2,30 +2,30 @@
     xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
     xmlns:xhtml="http://www.w3.org/1999/xhtml"
     ><url>
-            <loc>https://example.com/en/categories/</loc><changefreq>weekly</changefreq><priority>0.5</priority><xhtml:link
+            <loc>https://f0ghua.github.io/en/categories/</loc><changefreq>weekly</changefreq><priority>0.5</priority><xhtml:link
                         rel="alternate"
                         hreflang="zh-cn"
-                        href="https://example.com/categories/"
+                        href="https://f0ghua.github.io/categories/"
                         /><xhtml:link
                     rel="alternate"
                     hreflang="en"
-                    href="https://example.com/en/categories/"
+                    href="https://f0ghua.github.io/en/categories/"
                     /></url><url>
-            <loc>https://example.com/en/</loc><changefreq>weekly</changefreq><priority>0.5</priority><xhtml:link
+            <loc>https://f0ghua.github.io/en/</loc><changefreq>weekly</changefreq><priority>0.5</priority><xhtml:link
                         rel="alternate"
                         hreflang="zh-cn"
-                        href="https://example.com/"
+                        href="https://f0ghua.github.io/"
                         /><xhtml:link
                     rel="alternate"
                     hreflang="en"
-                    href="https://example.com/en/"
+                    href="https://f0ghua.github.io/en/"
                     /></url><url>
-            <loc>https://example.com/en/tags/</loc><changefreq>weekly</changefreq><priority>0.5</priority><xhtml:link
+            <loc>https://f0ghua.github.io/en/tags/</loc><changefreq>weekly</changefreq><priority>0.5</priority><xhtml:link
                         rel="alternate"
                         hreflang="zh-cn"
-                        href="https://example.com/tags/"
+                        href="https://f0ghua.github.io/tags/"
                         /><xhtml:link
                     rel="alternate"
                     hreflang="en"
-                    href="https://example.com/en/tags/"
+                    href="https://f0ghua.github.io/en/tags/"
                     /></url></urlset>
