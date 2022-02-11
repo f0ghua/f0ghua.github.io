@@ -1,16 +1,87 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  
-  <sitemap>
-    <loc>https://f0ghua.github.io/en/sitemap.xml</loc>
-    
-  </sitemap>
-  
-  <sitemap>
-    <loc>https://f0ghua.github.io/zh-cn/sitemap.xml</loc>
-    
-      <lastmod>2022-02-09T16:30:43+08:00</lastmod>
-    
-  </sitemap>
-  
-</sitemapindex>
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+	<url>
+		<loc>https://f0ghua.github.io/</loc>
+		<lastmod>2022-02-09</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>0.9</priority>
+	</url>
+	<url>
+		<loc>https://f0ghua.github.io/posts/</loc>
+		<lastmod>2022-02-09</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>0.8</priority>
+	</url>
+	<url>
+		<loc>https://f0ghua.github.io/tags/</loc>
+		<lastmod>2022-02-09</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>0.8</priority>
+	</url>
+	<url>
+		<loc>https://f0ghua.github.io/categories/</loc>
+		<lastmod>2022-02-09</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>0.8</priority>
+	</url>
+	<url>
+		<loc>https://f0ghua.github.io/sprintf/</loc>
+		<lastmod>2022-02-09</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>0.8</priority>
+	</url>
+	<url>
+		<loc>https://f0ghua.github.io/categories/programming/</loc>
+		<lastmod>2022-02-09</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>0.8</priority>
+	</url>
+	<url>
+		<loc>https://f0ghua.github.io/tags/c/</loc>
+		<lastmod>2022-02-09</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>0.8</priority>
+	</url>
+	<url>
+		<loc>https://f0ghua.github.io/strcpy/</loc>
+		<lastmod>2022-02-09</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>0.8</priority>
+	</url>
+	<url>
+		<loc>https://f0ghua.github.io/strncpy/</loc>
+		<lastmod>2022-02-09</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>0.8</priority>
+	</url>
+	<url>
+		<loc>https://f0ghua.github.io/sscanf/</loc>
+		<lastmod>2022-02-09</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>0.8</priority>
+	</url>
+	<url>
+		<loc>https://f0ghua.github.io/toeic_experience/</loc>
+		<lastmod>2022-02-09</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>0.8</priority>
+	</url>
+	<url>
+		<loc>https://f0ghua.github.io/categories/study/</loc>
+		<lastmod>2022-02-09</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>0.8</priority>
+	</url>
+	<url>
+		<loc>https://f0ghua.github.io/tags/english/</loc>
+		<lastmod>2022-02-09</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>0.8</priority>
+	</url>
+	<url>
+		<loc>https://f0ghua.github.io/snprintf/</loc>
+		<lastmod>2022-02-09</lastmod>
+		<changefreq>monthly</changefreq>
+		<priority>0.8</priority>
+	</url>
+</urlset>
