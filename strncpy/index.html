@@ -9,8 +9,8 @@
 <meta property="og:description" content="函数原型 1 2 3 #include &lt;string.h&gt; char *strncpy(char *dest, const char *src, size_t n); 用法分析 strncpy 由于添加了长度限制，避免了缓冲区溢出的问题。但在使用这个函数的时候必须要注意: strncpy 只有在源字符串的" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://f0ghua.github.io/strncpy/" /><meta property="og:image" content="https://f0ghua.github.io/logo.png"/><meta property="article:section" content="posts" />
-<meta property="article:published_time" content="2022-02-07T00:00:00+00:00" />
-<meta property="article:modified_time" content="2022-02-09T16:30:43+08:00" />
+<meta property="article:published_time" content="2022-06-30T00:00:00+00:00" />
+<meta property="article:modified_time" content="2022-06-30T09:39:16+08:00" />
 
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:image" content="https://f0ghua.github.io/logo.png"/>
@@ -20,7 +20,7 @@
 <meta name="application-name" content="Fog&#39;s Blog">
 <meta name="apple-mobile-web-app-title" content="Fog&#39;s Blog"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://f0ghua.github.io/strncpy/" /><link rel="prev" href="https://f0ghua.github.io/sscanf/" /><link rel="next" href="https://f0ghua.github.io/strcpy/" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css"><script type="application/ld+json">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://f0ghua.github.io/strncpy/" /><link rel="prev" href="https://f0ghua.github.io/sprintf/" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css"><script type="application/ld+json">
     {
         "@context": "http://schema.org",
         "@type": "BlogPosting",
@@ -29,8 +29,8 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "https:\/\/f0ghua.github.io\/strncpy\/"
-        },"image": ["https:\/\/f0ghua.github.io\/images\/Apple-Devices-Preview.png"],"genre": "posts","keywords": "c","wordcount":  617 ,
-        "url": "https:\/\/f0ghua.github.io\/strncpy\/","datePublished": "2022-02-07T00:00:00+00:00","dateModified": "2022-02-09T16:30:43+08:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
+        },"image": ["https:\/\/f0ghua.github.io\/images\/Apple-Devices-Preview.png"],"genre": "posts","keywords": "c","wordcount":  824 ,
+        "url": "https:\/\/f0ghua.github.io\/strncpy\/","datePublished": "2022-06-30T00:00:00+00:00","dateModified": "2022-06-30T09:39:16+08:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
             "@type": "Organization",
             "name": "xxxx","logo": "https:\/\/f0ghua.github.io\/images\/avatar.png"},"author": {
                 "@type": "Person",
@@ -110,7 +110,7 @@
             <div class="toc-content" id="toc-content-auto"></div>
         </div><article class="page single"><h1 class="single-title animated flipInX">C 语言常用库函数-strncpy</h1><div class="post-meta">
             <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>fog</a></span>&nbsp;<span class="post-category">收录于 <a href="/categories/programming/"><i class="far fa-folder fa-fw"></i>programming</a></span></div>
-            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-02-07">2022-02-07</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 617 字&nbsp;
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-06-30">2022-06-30</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 824 字&nbsp;
                 <i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 2 分钟&nbsp;</div>
         </div><div class="details toc" id="toc-static"  kept="">
                 <div class="details-summary toc-title">
@@ -121,7 +121,12 @@
   <ul>
     <li><a href="#函数原型">函数原型</a></li>
     <li><a href="#用法分析">用法分析</a></li>
-    <li><a href="#注意事项">注意事项</a></li>
+    <li><a href="#注意事项">注意事项</a>
+      <ul>
+        <li><a href="#strlcpy">strlcpy</a></li>
+        <li><a href="#strncpy-vs-snprintf">strncpy vs snprintf</a></li>
+      </ul>
+    </li>
   </ul>
 </nav></div>
             </div><div class="content" id="content"><h2 id="函数原型">函数原型</h2>
@@ -169,6 +174,7 @@
 </div>
 </div><p>这里可以看到，要正确使用 strncpy 还是挺麻烦的一件事情。</p>
 <h2 id="注意事项">注意事项</h2>
+<h3 id="strlcpy">strlcpy</h3>
 <p>其实在 openbsd 里面提供了一个库函数 strlcpy 。它保证了目的字串总是以 NUL 结尾，并且返回值总是目的字串的全长(不包括 NUL)。其源码如下</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -278,11 +284,38 @@
 <span class="p">}</span>
 </code></pre></td></tr></table>
 </div>
-</div></div><div class="post-footer" id="post-footer">
+</div><h3 id="strncpy-vs-snprintf">strncpy vs snprintf</h3>
+<p>除了使用 strlcpy，还有个好的选择是使用 snprintf。</p>
+<p>snprinf 可以完成 strncpy 的功能，而且比 strncpy 更有效率。看一下 glibc 中
+strncpy 的代码</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="kt">char</span> <span class="o">*</span>
+<span class="nf">STRNCPY</span> <span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">s1</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">s2</span><span class="p">,</span> <span class="n">size_t</span> <span class="n">n</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">size_t</span> <span class="n">size</span> <span class="o">=</span> <span class="n">__strnlen</span> <span class="p">(</span><span class="n">s2</span><span class="p">,</span> <span class="n">n</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">size</span> <span class="o">!=</span> <span class="n">n</span><span class="p">)</span>
+        <span class="n">memset</span> <span class="p">(</span><span class="n">s1</span> <span class="o">+</span> <span class="n">size</span><span class="p">,</span> <span class="sc">&#39;\0&#39;</span><span class="p">,</span> <span class="n">n</span> <span class="o">-</span> <span class="n">size</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">memcpy</span> <span class="p">(</span><span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="p">,</span> <span class="n">size</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>我们可以看到，当 s2 的长度小于 n 的时候，strncpy 会把 s1 中从 s2 的长度以后的所有字节都设置成 <code>'\0'</code> ，显然，这个对于我们大部分情况下的需求来说是没有必要的，只要将字符串的最后一个字节置 NULL 即可。这也是 snprinf 的做法。</p>
+</div><div class="post-footer" id="post-footer">
     <div class="post-info">
         <div class="post-info-line">
             <div class="post-info-mod">
-                <span>更新于 2022-02-09</span>
+                <span>更新于 2022-06-30</span>
             </div>
             <div class="post-info-license"></div>
         </div>
@@ -303,8 +336,7 @@
         </section>
     </div>
 
-    <div class="post-nav"><a href="/sscanf/" class="prev" rel="prev" title="C语言常用库函数-sscanf"><i class="fas fa-angle-left fa-fw"></i>C语言常用库函数-sscanf</a>
-            <a href="/strcpy/" class="next" rel="next" title="C 语言常用库函数-strcpy">C 语言常用库函数-strcpy<i class="fas fa-angle-right fa-fw"></i></a></div>
+    <div class="post-nav"><a href="/sprintf/" class="prev" rel="prev" title="C 语言常用库函数-sprintf"><i class="fas fa-angle-left fa-fw"></i>C 语言常用库函数-sprintf</a></div>
 </div>
 <div id="comments"><div id="utterances"></div><noscript>
                 Please enable JavaScript to view the comments powered by <a href="https://utteranc.es/">Utterances</a>.

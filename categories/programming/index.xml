@@ -3,7 +3,14 @@
         <title>programming - 分类 - Fog&#39;s Blog</title>
         <link>https://f0ghua.github.io/categories/programming/</link>
         <description>programming - 分类 - Fog&#39;s Blog</description>
-        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Mon, 07 Feb 2022 00:00:00 &#43;0000</lastBuildDate><atom:link href="https://f0ghua.github.io/categories/programming/" rel="self" type="application/rss+xml" /><item>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Thu, 30 Jun 2022 00:00:00 &#43;0000</lastBuildDate><atom:link href="https://f0ghua.github.io/categories/programming/" rel="self" type="application/rss+xml" /><item>
+    <title>C 语言常用库函数-strncpy</title>
+    <link>https://f0ghua.github.io/strncpy/</link>
+    <pubDate>Thu, 30 Jun 2022 00:00:00 &#43;0000</pubDate>
+    <author>作者</author>
+    <guid>https://f0ghua.github.io/strncpy/</guid>
+    <description><![CDATA[函数原型 1 2 3 #include &lt;string.h&gt; char *strncpy(char *dest, const char *src, size_t n); 用法分析 strncpy 由于添加了长度限制，避免了缓冲区溢出的问题。但在使用这个函数的时候必须要注意: strncpy 只有在源字符串的]]></description>
+</item><item>
     <title>C 语言常用库函数-sprintf</title>
     <link>https://f0ghua.github.io/sprintf/</link>
     <pubDate>Mon, 07 Feb 2022 00:00:00 &#43;0000</pubDate>
@@ -17,13 +24,6 @@
     <author>作者</author>
     <guid>https://f0ghua.github.io/strcpy/</guid>
     <description><![CDATA[函数原型 1 2 3 #include &lt;string.h&gt; char *strcpy(char *dest, const char *src); 用法分析 strcpy 属于无边界检查的一类函数，因此使用起来十分的危险，在标准文档中已经不建议使用。 无边界检查很容易就会发]]></description>
-</item><item>
-    <title>C 语言常用库函数-strncpy</title>
-    <link>https://f0ghua.github.io/strncpy/</link>
-    <pubDate>Mon, 07 Feb 2022 00:00:00 &#43;0000</pubDate>
-    <author>作者</author>
-    <guid>https://f0ghua.github.io/strncpy/</guid>
-    <description><![CDATA[函数原型 1 2 3 #include &lt;string.h&gt; char *strncpy(char *dest, const char *src, size_t n); 用法分析 strncpy 由于添加了长度限制，避免了缓冲区溢出的问题。但在使用这个函数的时候必须要注意: strncpy 只有在源字符串的]]></description>
 </item><item>
     <title>C语言常用库函数-sscanf</title>
     <link>https://f0ghua.github.io/sscanf/</link>
