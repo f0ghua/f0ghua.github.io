@@ -5,32 +5,32 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="robots" content="noodp" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
-        <title>证书原理简明 - Fog&#39;s Blog</title><meta name="Description" content="Technology sharing"><meta property="og:title" content="证书原理简明" />
-<meta property="og:description" content="预备知识 CA 是 Certificate Authority 的缩写，也叫“证书授权中心”。数字证书实际上是存于计算机上的一个记录，是由 CA 签发的一个声明，证明证书主体（“证书申请者”被发" />
+        <title>无线协议学习笔录 - Fog&#39;s Blog</title><meta name="Description" content="Technology sharing"><meta property="og:title" content="无线协议学习笔录" />
+<meta property="og:description" content="概述 从一次正常的连接说起 先从一次简单的连接看起。测试环境就是一台无线 STA 和一个 AP，以及一台用来抓包的 PC 。 1 2 3 4 5 6 7 8 9 10 &#43;--------&#43; &#43;-------&#43; | STA | | AP |" />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://f0ghua.github.io/ca/" /><meta property="og:image" content="https://f0ghua.github.io/logo.png"/><meta property="article:section" content="posts" />
-<meta property="article:published_time" content="2022-06-30T23:46:00+08:00" />
-<meta property="article:modified_time" content="2022-07-01T00:13:35+08:00" />
+<meta property="og:url" content="https://f0ghua.github.io/wireless/" /><meta property="og:image" content="https://f0ghua.github.io/logo.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2022-02-07T13:56:00+08:00" />
+<meta property="article:modified_time" content="2022-07-05T17:25:01+08:00" />
 
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:image" content="https://f0ghua.github.io/logo.png"/>
 
-<meta name="twitter:title" content="证书原理简明"/>
-<meta name="twitter:description" content="预备知识 CA 是 Certificate Authority 的缩写，也叫“证书授权中心”。数字证书实际上是存于计算机上的一个记录，是由 CA 签发的一个声明，证明证书主体（“证书申请者”被发"/>
+<meta name="twitter:title" content="无线协议学习笔录"/>
+<meta name="twitter:description" content="概述 从一次正常的连接说起 先从一次简单的连接看起。测试环境就是一台无线 STA 和一个 AP，以及一台用来抓包的 PC 。 1 2 3 4 5 6 7 8 9 10 &#43;--------&#43; &#43;-------&#43; | STA | | AP |"/>
 <meta name="application-name" content="Fog&#39;s Blog">
 <meta name="apple-mobile-web-app-title" content="Fog&#39;s Blog"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://f0ghua.github.io/ca/" /><link rel="prev" href="https://f0ghua.github.io/strncpy/" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css"><script type="application/ld+json">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://f0ghua.github.io/wireless/" /><link rel="prev" href="https://f0ghua.github.io/sprintf/" /><link rel="next" href="https://f0ghua.github.io/strncpy/" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css"><script type="application/ld+json">
     {
         "@context": "http://schema.org",
         "@type": "BlogPosting",
-        "headline": "证书原理简明",
+        "headline": "无线协议学习笔录",
         "inLanguage": "zh-CN",
         "mainEntityOfPage": {
             "@type": "WebPage",
-            "@id": "https:\/\/f0ghua.github.io\/ca\/"
-        },"image": ["https:\/\/f0ghua.github.io\/images\/Apple-Devices-Preview.png"],"genre": "posts","wordcount":  911 ,
-        "url": "https:\/\/f0ghua.github.io\/ca\/","datePublished": "2022-06-30T23:46:00+08:00","dateModified": "2022-07-01T00:13:35+08:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
+            "@id": "https:\/\/f0ghua.github.io\/wireless\/"
+        },"image": ["https:\/\/f0ghua.github.io\/images\/Apple-Devices-Preview.png"],"genre": "posts","keywords": "wifi, wireless, protocol","wordcount":  138 ,
+        "url": "https:\/\/f0ghua.github.io\/wireless\/","datePublished": "2022-02-07T13:56:00+08:00","dateModified": "2022-07-05T17:25:01+08:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
             "@type": "Organization",
             "name": "xxxx","logo": "https:\/\/f0ghua.github.io\/images\/avatar.png"},"author": {
                 "@type": "Person",
@@ -47,7 +47,7 @@
         </div>
         <div class="menu">
             <div class="menu-inner"><a class="menu-item" href="/posts/"> 所有文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><a class="menu-item" href="/categories/documentation/"> 文档 </a><a class="menu-item" href="/about/"> 关于 </a><a class="menu-item" href="https://github.com/dillonzq/LoveIt" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><a href="javascript:void(0);" class="menu-item language" title="选择语言">简体中文<i class="fas fa-chevron-right fa-fw"></i>
-                        <select class="language-select" id="language-select-desktop" onchange="location = this.value;"><option value="/ca/" selected>简体中文</option></select>
+                        <select class="language-select" id="language-select-desktop" onchange="location = this.value;"><option value="/wireless/" selected>简体中文</option></select>
                     </a><span class="menu-item search" id="search-desktop">
                         <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
                         <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
@@ -94,7 +94,7 @@
                 </div><a class="menu-item" href="/posts/" title="">所有文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a class="menu-item" href="/categories/documentation/" title="">文档</a><a class="menu-item" href="/about/" title="">关于</a><a class="menu-item" href="https://github.com/dillonzq/LoveIt" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
                 <i class="fas fa-adjust fa-fw"></i>
             </a><a href="javascript:void(0);" class="menu-item" title="选择语言">简体中文<i class="fas fa-chevron-right fa-fw"></i>
-                    <select class="language-select" onchange="location = this.value;"><option value="/ca/" selected>简体中文</option></select>
+                    <select class="language-select" onchange="location = this.value;"><option value="/wireless/" selected>简体中文</option></select>
                 </a></div>
     </div>
 </header>
@@ -108,10 +108,10 @@
                 <div class="container"><div class="toc" id="toc-auto">
             <h2 class="toc-title">目录</h2>
             <div class="toc-content" id="toc-content-auto"></div>
-        </div><article class="page single"><h1 class="single-title animated flipInX">证书原理简明</h1><div class="post-meta">
-            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>fog</a></span></div>
-            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-06-30">2022-06-30</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 911 字&nbsp;
-                <i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 2 分钟&nbsp;</div>
+        </div><article class="page single"><h1 class="single-title animated flipInX">无线协议学习笔录</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>fog</a></span>&nbsp;<span class="post-category">收录于 <a href="/categories/network/"><i class="far fa-folder fa-fw"></i>network</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-02-07">2022-02-07</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 138 字&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 1 分钟&nbsp;</div>
         </div><div class="details toc" id="toc-static"  kept="">
                 <div class="details-summary toc-title">
                     <span>目录</span>
@@ -119,64 +119,94 @@
                 </div>
                 <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
   <ul>
-    <li><a href="#预备知识">预备知识</a></li>
-    <li><a href="#ca-认证">CA 认证</a></li>
+    <li><a href="#概述">概述</a></li>
+    <li><a href="#从一次正常的连接说起">从一次正常的连接说起</a>
+      <ul>
+        <li><a href="#管理报文">管理报文</a></li>
+        <li><a href="#数据报文">数据报文</a></li>
+      </ul>
+    </li>
+    <li><a href="#附录">附录</a>
+      <ul>
+        <li><a href="#linux-抓无线包">Linux 抓无线包</a></li>
+        <li><a href="#wireshark-解密无线包">Wireshark 解密无线包</a></li>
+      </ul>
+    </li>
   </ul>
 </nav></div>
-            </div><div class="content" id="content"><h2 id="预备知识">预备知识</h2>
-<p>CA 是 Certificate Authority 的缩写，也叫“证书授权中心”。数字证书实际上是存于计算机上的一个记录，是由 CA 签发的一个声明，证明证书主体（“证书申请者”被发放证书后即成为“证书主体”）与证书中所包含的公钥的惟一对应关系。</p>
-<p>在进入 CA 的讨论之前，我们先必须对公钥算法有个概念，因为 CA 认证就是使用的公钥算法。公钥算法一般有一对 key，称为私钥(private key)和公钥(public key)。私钥加密的数据需要用公钥来解密，同样公钥加密的也需要用私钥来解密。</p>
-<p>一般来说私钥都是妥善保存不为人知的，而公钥会放在证书中发布出去供人使用。</p>
-<h2 id="ca-认证">CA 认证</h2>
-<p>CA 分为 Signed CA 和 Self Signed CA。两者的差别在于其证书（certificate）被认证的方式不同。</p>
-<p>Self Signed CA 是指由自己给自己的 certificate 做签名认证的 CA ，由于一般来讲此类 CA
-总是处于 CA 链的最顶端，所以又叫 Root CA。</p>
-<p>Signed CA 是指 certificate 由其他 CA 进行签名认证的 CA。而认证它的 CA，我们称为 Signed
-CA 的上层 CA，也叫 Parent CA；而 Signed CA 则称为 Sub CA 或 Child CA。</p>
-<p>在更深入了解 CA 的原理前，先说明几个组成元素</p>
-<ul>
-<li>私钥(key - private key)</li>
-<li>证书请求(csr - certificate signing request)</li>
-<li>签名证书(crt - certificate signed request)</li>
-</ul>
-<p>然后我们举例来说明 CA 认证的一个过程。</p>
-<p>小明和小王想要互相交换信息，但是又害怕有人在中间冒充，所以使用了如下的方式</p>
-<ul>
-<li>小明首先创建了一对 key 。即公钥（public key）和私钥（private key）。私钥妥善保存了起来。</li>
-<li>然后小明提交了一个证书请求（其中包含了小明的 public key）给某个大家都认可的证书授权中心（CA）去做认证</li>
-<li>CA 签署了证书请求并颁发了一个新的证书给小明。跟公钥一样，小明可以把这个证书发布给公众。</li>
-<li>小王下载了 CA 的数字证书。这个数字证书里面就包含了 CA 的公钥。小王可以用这个数字证书里的公钥来验证小明的数字证书，保证小明的证书的确是由 CA 颁发的。</li>
-<li>小明给小王发送了他的数字证书，其中包含了小明的公钥。小王用 CA 的数字证书验证小明的数字证书，并获得了小明的公钥。</li>
-<li>同样的方式，小明也可以验证小王的数字证书，并获得小王的公钥。</li>
-<li>注意，在此过程中如果有人在中间伪造了数字证书发给小王或者小明，那么 CA 的数字证书验证就无法通过，从而防止了中间人攻击。</li>
-<li>这样，小明和小王都可以通过对方的公钥来解密对方私钥加密发送过来的数据了。</li>
-</ul>
+            </div><div class="content" id="content"><h2 id="概述">概述</h2>
+<h2 id="从一次正常的连接说起">从一次正常的连接说起</h2>
+<p>先从一次简单的连接看起。测试环境就是一台无线 STA 和一个 AP，以及一台用来抓包的 PC 。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh">
+  +--------+               +-------+
+  <span class="p">|</span>  STA   <span class="p">|</span>               <span class="p">|</span>  AP   <span class="p">|</span>
+  +--------+               +-------+
+
+             +---------+
+             <span class="p">|</span> capture <span class="p">|</span>
+             <span class="p">|</span> PC      <span class="p">|</span>
+             +---------+
+
+</code></pre></td></tr></table>
+</div>
+</div><p>通过 PC 用 wireshark 来抓取 STA 和 AP 之间的无线数据报文。</p>
+<h3 id="管理报文">管理报文</h3>
+<p>先看看管理报文</p>
+<p><figure><a class="lightgallery" href="/ox-hugo/wireless.img.5ee5486e.png" title="Wireless Management Packets" data-thumbnail="/ox-hugo/wireless.img.5ee5486e.png" data-sub-html="<h2>Wireless Management Packets</h2><p>Wireless Management Packets</p>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/ox-hugo/wireless.img.5ee5486e.png"
+            data-srcset="/ox-hugo/wireless.img.5ee5486e.png, /ox-hugo/wireless.img.5ee5486e.png 1.5x, /ox-hugo/wireless.img.5ee5486e.png 2x"
+            data-sizes="auto"
+            alt="/ox-hugo/wireless.img.5ee5486e.png" />
+    </a><figcaption class="image-caption">Wireless Management Packets</figcaption>
+    </figure></p>
+<h3 id="数据报文">数据报文</h3>
+<h2 id="附录">附录</h2>
+<h3 id="linux-抓无线包">Linux 抓无线包</h3>
+<h3 id="wireshark-解密无线包">Wireshark 解密无线包</h3>
 </div><div class="post-footer" id="post-footer">
     <div class="post-info">
         <div class="post-info-line">
             <div class="post-info-mod">
-                <span>更新于 2022-07-01</span>
+                <span>更新于 2022-07-05</span>
             </div>
             <div class="post-info-license"></div>
         </div>
         <div class="post-info-line">
             <div class="post-info-md"><span>
-                            <a class="link-to-markdown" href="/ca/index.md" target="_blank">阅读原始文档</a>
+                            <a class="link-to-markdown" href="/wireless/index.md" target="_blank">阅读原始文档</a>
                         </span></div>
             <div class="post-info-share">
-                <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://f0ghua.github.io/ca/" data-title="证书原理简明"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://f0ghua.github.io/ca/"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Hacker News" data-sharer="hackernews" data-url="https://f0ghua.github.io/ca/" data-title="证书原理简明"><i class="fab fa-hacker-news fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://f0ghua.github.io/ca/" data-title="证书原理简明"><i data-svg-src="https://cdn.jsdelivr.net/npm/simple-icons@2.14.0/icons/line.svg"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://f0ghua.github.io/ca/" data-title="证书原理简明"><i class="fab fa-weibo fa-fw"></i></a></span>
+                <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://f0ghua.github.io/wireless/" data-title="无线协议学习笔录" data-hashtags="wifi,wireless,protocol"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://f0ghua.github.io/wireless/" data-hashtag="wifi"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Hacker News" data-sharer="hackernews" data-url="https://f0ghua.github.io/wireless/" data-title="无线协议学习笔录"><i class="fab fa-hacker-news fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://f0ghua.github.io/wireless/" data-title="无线协议学习笔录"><i data-svg-src="https://cdn.jsdelivr.net/npm/simple-icons@2.14.0/icons/line.svg"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://f0ghua.github.io/wireless/" data-title="无线协议学习笔录"><i class="fab fa-weibo fa-fw"></i></a></span>
             </div>
         </div>
     </div>
 
     <div class="post-info-more">
-        <section class="post-tags"></section>
+        <section class="post-tags"><i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/wifi/">wifi</a>,&nbsp;<a href="/tags/wireless/">wireless</a>,&nbsp;<a href="/tags/protocol/">protocol</a></section>
         <section>
             <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
         </section>
     </div>
 
-    <div class="post-nav"><a href="/strncpy/" class="prev" rel="prev" title="C 语言常用库函数-strncpy"><i class="fas fa-angle-left fa-fw"></i>C 语言常用库函数-strncpy</a></div>
+    <div class="post-nav"><a href="/sprintf/" class="prev" rel="prev" title="C 语言常用库函数-sprintf"><i class="fas fa-angle-left fa-fw"></i>C 语言常用库函数-sprintf</a>
+            <a href="/strncpy/" class="next" rel="next" title="C 语言常用库函数-strncpy">C 语言常用库函数-strncpy<i class="fas fa-angle-right fa-fw"></i></a></div>
 </div>
 <div id="comments"><div id="utterances"></div><noscript>
                 Please enable JavaScript to view the comments powered by <a href="https://utteranc.es/">Utterances</a>.

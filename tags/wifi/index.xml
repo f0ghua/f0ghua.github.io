@@ -1,0 +1,14 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>wifi - 标签 - Fog&#39;s Blog</title>
+        <link>https://f0ghua.github.io/tags/wifi/</link>
+        <description>wifi - 标签 - Fog&#39;s Blog</description>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Mon, 07 Feb 2022 13:56:00 &#43;0800</lastBuildDate><atom:link href="https://f0ghua.github.io/tags/wifi/" rel="self" type="application/rss+xml" /><item>
+    <title>无线协议学习笔录</title>
+    <link>https://f0ghua.github.io/wireless/</link>
+    <pubDate>Mon, 07 Feb 2022 13:56:00 &#43;0800</pubDate>
+    <author>作者</author>
+    <guid>https://f0ghua.github.io/wireless/</guid>
+    <description><![CDATA[概述 从一次正常的连接说起 先从一次简单的连接看起。测试环境就是一台无线 STA 和一个 AP，以及一台用来抓包的 PC 。 1 2 3 4 5 6 7 8 9 10 +--------+ +-------+ | STA | | AP |]]></description>
+</item></channel>
+</rss>

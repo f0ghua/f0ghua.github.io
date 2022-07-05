@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+        <title>信息安全技术入门 - Fog&#39;s Blog</title><meta name="Description" content="Technology sharing"><meta property="og:title" content="信息安全技术入门" />
+<meta property="og:description" content="谈到信息安全，我只能算是个门外汉。但是由于工作需求，经常也会接触一些，所以整理一下备查。顺便也把自己的一些心得分享出来。 关键字 我们在看跟安全" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://f0ghua.github.io/security/" /><meta property="og:image" content="https://f0ghua.github.io/logo.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2022-07-01T09:11:00+08:00" />
+<meta property="article:modified_time" content="2022-07-05T17:24:59+08:00" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://f0ghua.github.io/logo.png"/>
+
+<meta name="twitter:title" content="信息安全技术入门"/>
+<meta name="twitter:description" content="谈到信息安全，我只能算是个门外汉。但是由于工作需求，经常也会接触一些，所以整理一下备查。顺便也把自己的一些心得分享出来。 关键字 我们在看跟安全"/>
+<meta name="application-name" content="Fog&#39;s Blog">
+<meta name="apple-mobile-web-app-title" content="Fog&#39;s Blog"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://f0ghua.github.io/security/" /><link rel="prev" href="https://f0ghua.github.io/strncpy/" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "信息安全技术入门",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/f0ghua.github.io\/security\/"
+        },"image": ["https:\/\/f0ghua.github.io\/images\/Apple-Devices-Preview.png"],"genre": "posts","wordcount":  3071 ,
+        "url": "https:\/\/f0ghua.github.io\/security\/","datePublished": "2022-07-01T09:11:00+08:00","dateModified": "2022-07-05T17:24:59+08:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
+            "@type": "Organization",
+            "name": "xxxx","logo": "https:\/\/f0ghua.github.io\/images\/avatar.png"},"author": {
+                "@type": "Person",
+                "name": "fog"
+            },"description": ""
+    }
+    </script></head>
+    <body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('auto' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'auto' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Fog&#39;s Blog"><span class="header-title-pre"><i class='far fa-kiss-wink-heart fa-fw'></i></span>Fog&#39;s Blog</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 所有文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><a class="menu-item" href="/categories/documentation/"> 文档 </a><a class="menu-item" href="/about/"> 关于 </a><a class="menu-item" href="https://github.com/dillonzq/LoveIt" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><a href="javascript:void(0);" class="menu-item language" title="选择语言">简体中文<i class="fas fa-chevron-right fa-fw"></i>
+                        <select class="language-select" id="language-select-desktop" onchange="location = this.value;"><option value="/security/" selected>简体中文</option></select>
+                    </a><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Fog&#39;s Blog"><span class="header-title-pre"><i class='far fa-kiss-wink-heart fa-fw'></i></span>Fog&#39;s Blog</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">所有文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a class="menu-item" href="/categories/documentation/" title="">文档</a><a class="menu-item" href="/about/" title="">关于</a><a class="menu-item" href="https://github.com/dillonzq/LoveIt" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a><a href="javascript:void(0);" class="menu-item" title="选择语言">简体中文<i class="fas fa-chevron-right fa-fw"></i>
+                    <select class="language-select" onchange="location = this.value;"><option value="/security/" selected>简体中文</option></select>
+                </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animated flipInX">信息安全技术入门</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>fog</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-07-01">2022-07-01</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 3071 字&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 7 分钟&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>目录</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#关键字">关键字</a></li>
+    <li><a href="#相关技术">相关技术</a>
+      <ul>
+        <li><a href="#对称加密算法">对称加密算法</a></li>
+        <li><a href="#非对称加密算法-公钥加密">非对称加密算法（公钥加密）</a></li>
+        <li><a href="#pki">PKI</a>
+          <ul>
+            <li><a href="#ca">CA</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#实例说明">实例说明</a>
+      <ul>
+        <li><a href="#pki">PKI</a>
+          <ul>
+            <li><a href="#生成-ca-的私钥">生成 CA 的私钥</a></li>
+            <li><a href="#生成-ca-的自我签名证书">生成 CA 的自我签名证书</a></li>
+            <li><a href="#生成用户的私有密钥">生成用户的私有密钥</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#reference">Reference</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><p>谈到信息安全，我只能算是个门外汉。但是由于工作需求，经常也会接触一些，所以整理一下备查。顺便也把自己的一些心得分享出来。</p>
+<h2 id="关键字">关键字</h2>
+<p>我们在看跟安全相关的文献的时候，最常看到的就是以下的一些词汇。理解它们对于理解相关技术是很重要的。</p>
+<ul>
+<li>Confidentiality 保密性</li>
+<li>Encrypt 加密</li>
+<li>Integrity 完整性（你有没有被篡改过？）</li>
+<li>Authentication 认证（你是谁？）</li>
+</ul>
+<h2 id="相关技术">相关技术</h2>
+<p>所有的技术都是为了满足应用的需求而产生。安全技术也不例外。</p>
+<h3 id="对称加密算法">对称加密算法</h3>
+<p>考虑一个场景。A 是一个地下工作者，每隔一段时间，他都要和自己的上线 B 联系传递信息。为了保证信息不被窃听，A 需要把自己的信息加密之后再发送给 B，而 B 要做的就是解密并查看 A 给他的信息。之后 B 同样的也可以加密自己的信息再传递给 A。</p>
+<p>这里用到的加解密，最常用的方式就是对称式的加密算法了。也就是双方都拥有一个相同的秘钥（key），然后使用相同的算法来加密或者解密，最终获得明文。</p>
+<p>这样的加密算法有很多，通过 <code>man openssl -&gt; Encoding and Cipher Commands</code> 可以看到一些常用的算法列表。</p>
+<h3 id="非对称加密算法-公钥加密">非对称加密算法（公钥加密）</h3>
+<p>这样的方式很简便快捷，但是存在一个问题。那就是 A 的秘钥每次更新的时候都必须通知 B
+以进行同步。这个通知的过程就存在着的泄漏的风险。</p>
+<p>于是 A B 在商量之后更新了他们的加密策略，采用了公钥加密算法。</p>
+<p>公钥加密算法和对称加密算法不同，包含了 2 个 key。一个私钥（private key）和一个公钥（public key）。公钥可以公开发布，用来加密信息；而私钥只会妥善保存好，用来解密公钥加密的信息。因为私钥不会被传播，所以就解决了对称性加密带来的秘钥泄漏的风险。注意，虽然一般情况下我们都是用公钥加密私钥解密，但是逆过来也是可行的。私钥加密的信息，使用公钥同样可以解密。</p>
+<p>比较典型的非对称加密算法就是 RSA 了。</p>
+<h3 id="pki">PKI</h3>
+<p>但是怎么确定 B 拿到的公钥是属于 A 的呢？如果中间有人偷偷把 A 发给 B 的公钥换掉了，那不就可以伪装成 A 了吗？</p>
+<p>PKI 隆重登场。PKI 中文译为公钥基础设施，它是英文 Public Key Infrastructure 的缩写，基于公钥密码学，建立起一种普遍适用的基础设施，为各种网络应用提供全面的安全服务。</p>
+<p>我们可以简单的认为 PKI 体系就是为了沟通的双方安全的拿到对方的秘钥（真实，完整）。</p>
+<p>PKI 基本结构由证书认证机构（certificate authority, CA）、证书持有者（certificate
+holder）、依赖方（relying party）三方构成</p>
+<ul>
+<li>
+<p>CA 是一个独立的可信第三方，为证书持有者签发数字证书，数字证书中声明了证书持有者的身份和公钥。CA 在签发证书前应对证书持有者的身份信息进行核实验证，并根据其核验结果为其签发证书。</p>
+</li>
+<li>
+<p>证书持有者向 CA 申请数字证书，并向 CA 提供必要的信息以证明其身份及能力，获得由
+CA 签发的证书；证书持有者在与依赖方进行交互时，需向依赖方提供由 CA 签发的数字证书证明其有效身份。</p>
+</li>
+<li>
+<p>依赖方是证书的验证方，依赖方与证书持有者进行交互（如建立通信连接）时，需获取证书持有者的数字证书，验证数字证书的真实性和有效性。依赖方可以指定其信任的 CA 列表，若证书持有者提供的数字证书不是受信 CA 签发的数字证书，依赖方将不认可该证书所声明的信息。</p>
+</li>
+</ul>
+<p>所以三者的关系，简单来说就如下图：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">
+                         +--------------+
+               +-----&gt;   <span class="p">|</span>      CA      <span class="p">|</span> &lt;----+
+               <span class="p">|</span> +----+  +--------------+      <span class="p">|</span>
+       request <span class="p">|</span> <span class="p">|</span> identify                    <span class="p">|</span>
+   certficiate <span class="p">|</span> <span class="p">|</span> issue certificate           <span class="p">|</span> trust
+               <span class="p">|</span> <span class="p">|</span>                             <span class="p">|</span>
+               <span class="p">|</span> v                             <span class="p">|</span>
+               <span class="p">|</span>            provide            <span class="p">|</span>
+           +-------------+  certificate +-------------+
+           <span class="p">|</span> certificate <span class="p">|</span> +---------&gt;  <span class="p">|</span> relay party <span class="p">|</span>
+           <span class="p">|</span> holder      <span class="p">|</span> &lt;---------+  <span class="p">|</span>             <span class="p">|</span>
+           +-------------+  verifiy     +-------------+
+                            certificate
+
+</code></pre></td></tr></table>
+</div>
+</div><p>证书存在的意义在于回答“公钥属于谁”的问题，以帮助用户安全地获得对方的公开密钥。</p>
+<p>在理解了 PKI 之后，我们再来看 A B 可以如何交互</p>
+<ul>
+<li>私钥(key - private key)</li>
+<li>证书请求(csr - certificate signing request)</li>
+<li>签名证书(crt - certificate signed request)</li>
+</ul>
+<!--listend-->
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">
+                    A                      CA        B
+
+                    +                       +        +
+                    <span class="p">|</span>                       <span class="p">|</span>        <span class="p">|</span>
+   generate a pair  <span class="p">|</span>                       <span class="p">|</span>        <span class="p">|</span>
+           of keys  <span class="p">|</span>                       <span class="p">|</span>        <span class="p">|</span>
+                    <span class="p">|</span>  send csr             <span class="p">|</span>        <span class="p">|</span>
+                    <span class="p">|</span> +-------------------&gt; <span class="p">|</span>        <span class="p">|</span>
+                    <span class="p">|</span>                       <span class="p">|</span>        <span class="p">|</span>
+                    <span class="p">|</span>  1. verify identity   <span class="p">|</span>        <span class="p">|</span>
+                    <span class="p">|</span>  2. sign the csr      <span class="p">|</span>        <span class="p">|</span>
+                    <span class="p">|</span>  3. send back the cer <span class="p">|</span>        <span class="p">|</span>
+                    <span class="p">|</span> &lt;-------------------+ <span class="p">|</span>        <span class="p">|</span>
+                    <span class="p">|</span>                       <span class="p">|</span>        <span class="p">|</span>
+                    <span class="p">|</span>                       <span class="p">|</span>        <span class="p">|</span>
+                    <span class="p">|</span>  send A<span class="s1">&#39;s crt to B    |        |
+</span><span class="s1">                    | +----------------------------&gt; | 1. verify with CA&#39;</span>s cert
+                    <span class="p">|</span>                       <span class="p">|</span>        <span class="p">|</span> 2. store A<span class="s1">&#39;s public key
+</span><span class="s1">                    |                       |        |
+</span><span class="s1">                    |                       |        |
+</span><span class="s1">                    |         send data to A|        |
+</span><span class="s1">   decrypt with A&#39;</span>s <span class="p">|</span> &lt;----------------------------+ <span class="p">|</span> encrypt data with
+        private key <span class="p">|</span>                       <span class="p">|</span>        <span class="p">|</span> A<span class="err">&#39;</span>s public key
+                    <span class="p">|</span>                       <span class="p">|</span>        <span class="p">|</span>
+                    <span class="p">|</span>                       <span class="p">|</span>        <span class="p">|</span>
+                    <span class="p">|</span>                       <span class="p">|</span>        <span class="p">|</span>
+                    <span class="p">|</span>                       <span class="p">|</span>        <span class="p">|</span>
+                    +                       +        +
+
+</code></pre></td></tr></table>
+</div>
+</div><p>图示只标注了 B 往 A 发送数据的过程，如果是 A 往 B 传递信息，那么同样的方法，只是换成使用
+B 的 key 而已。</p>
+<p>在这里面还有几点需要说明的</p>
+<ul>
+<li>所谓的签名，其实可以简单的理解成把原始证书先做 hash，再使用 CA 的 private key
+对这个 hash 值进行加密，最后添加到证书里面的一个过程</li>
+<li>证书可以由 CA 签名，也可以自签名</li>
+<li>证书一般使用 X509 的格式，其中中包含了持有者的公钥和发布者的签名，以及其他的一些表明证书身份相关的信息</li>
+</ul>
+<h4 id="ca">CA</h4>
+<p>CA 分为 Signed CA 和 Self Signed CA。两者的差别在于其证书（certificate）被认证的方式不同。</p>
+<p>Self Signed CA 是指由自己给自己的 certificate 做签名认证的 CA ，由于一般来讲此类
+CA 总是处于 CA 链的最顶端，所以又叫 Root CA。</p>
+<p>Signed CA 是指 certificate 由其他 CA 进行签名认证的 CA。而认证它的 CA，我们称为
+Signed CA 的上层 CA，也叫 Parent CA；而 Signed CA 则称为 Sub CA 或 Child CA。</p>
+<h2 id="实例说明">实例说明</h2>
+<h3 id="pki">PKI</h3>
+<p>下面，就用 openssl 举例生成 RSA 的 CA 和用户证书。</p>
+<h4 id="生成-ca-的私钥">生成 CA 的私钥</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="o">[</span>fog@fog-ibm ca<span class="o">]</span> openssl genrsa -des3 -out ca.key <span class="m">1024</span>
+
+Generating RSA private key, <span class="m">1024</span> bit long modulus
+...........................+++++
+............................................+++++
+e is <span class="m">65537</span> <span class="o">(</span>0x10001<span class="o">)</span>
+Enter PEM pass phrase:
+Verifying password - Enter PEM pass phrase:
+
+Please backup this ca.key file and remember the pass-phrase you had to
+enter at a secure location.
+</code></pre></td></tr></table>
+</div>
+</div><h4 id="生成-ca-的自我签名证书">生成 CA 的自我签名证书</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">fog@tmp$ openssl req -new -x509 -days <span class="m">365</span> -key ca.key -out ca.crt
+Enter pass phrase <span class="k">for</span> ca.key:
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter <span class="s1">&#39;.&#39;</span>, the field will be left blank.
+-----
+Country Name <span class="o">(</span><span class="m">2</span> letter code<span class="o">)</span> <span class="o">[</span>AU<span class="o">]</span>:
+State or Province Name <span class="o">(</span>full name<span class="o">)</span> <span class="o">[</span>Some-State<span class="o">]</span>:
+Locality Name <span class="o">(</span>eg, city<span class="o">)</span> <span class="o">[]</span>:
+Organization Name <span class="o">(</span>eg, company<span class="o">)</span> <span class="o">[</span>Internet Widgits Pty Ltd<span class="o">]</span>:
+Organizational Unit Name <span class="o">(</span>eg, section<span class="o">)</span> <span class="o">[]</span>:
+Common Name <span class="o">(</span>e.g. server FQDN or YOUR name<span class="o">)</span> <span class="o">[]</span>:Fog
+Email Address <span class="o">[]</span>:
+</code></pre></td></tr></table>
+</div>
+</div><p>查看一下生成的证书</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">fog@tmp$ openssl x509 -noout -text -in ca.crt
+Certificate:
+    Data:
+        Version: <span class="m">3</span> <span class="o">(</span>0x2<span class="o">)</span>
+        Serial Number:
+            6c:5b:7a:5c:37:e3:1b:2d:99:2d:99:20:79:54:c4:d6:52:9e:20:17
+        Signature Algorithm: sha256WithRSAEncryption
+        Issuer: <span class="nv">C</span> <span class="o">=</span> AU, <span class="nv">ST</span> <span class="o">=</span> Some-State, <span class="nv">O</span> <span class="o">=</span> Internet Widgits Pty Ltd, <span class="nv">CN</span> <span class="o">=</span> Fog
+        Validity
+            Not Before: Jul  <span class="m">5</span> 08:43:44 <span class="m">2022</span> GMT
+            Not After : Jul  <span class="m">5</span> 08:43:44 <span class="m">2023</span> GMT
+        Subject: <span class="nv">C</span> <span class="o">=</span> AU, <span class="nv">ST</span> <span class="o">=</span> Some-State, <span class="nv">O</span> <span class="o">=</span> Internet Widgits Pty Ltd, <span class="nv">CN</span> <span class="o">=</span> Fog
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                RSA Public-Key: <span class="o">(</span><span class="m">1024</span> bit<span class="o">)</span>
+                Modulus:
+                    00:c2:ad:39:a9:64:a5:85:5b:39:ab:eb:a8:da:82:
+                    66:90:60:f9:35:d9:ea:67:4e:6f:d6:99:14:1c:32:
+                    6a:23:e4:03:eb:11:44:1a:94:4d:42:a1:74:9e:26:
+                    62:10:0b:4b:a8:3c:10:28:32:c9:d9:1b:34:aa:03:
+                    5d:d6:63:70:32:68:c0:d2:9d:17:e7:b4:47:6e:6e:
+                    86:66:a5:bc:f1:52:4e:2a:47:2a:0e:7b:00:d7:f9:
+                    d0:70:c2:12:58🆎df:b3:82:51:23:cf:a8:59:40:
+                    c6:a7:7e:f6:8c:91:1e:00:42:87:d1:42:1c:98:15:
+                    4e:ff:1c:38:55:8a:d1:9d:fb
+                Exponent: <span class="m">65537</span> <span class="o">(</span>0x10001<span class="o">)</span>
+        X509v3 extensions:
+            X509v3 Subject Key Identifier:
+                3F:46:C9:DA:5C:4E:60:65:CB:48:8E:DF:FE:92:67:2C:03:A4:B0:A1
+            X509v3 Authority Key Identifier:
+                keyid:3F:46:C9:DA:5C:4E:60:65:CB:48:8E:DF:FE:92:67:2C:03:A4:B0:A1
+
+            X509v3 Basic Constraints: critical
+                CA:TRUE
+    Signature Algorithm: sha256WithRSAEncryption
+         72:98:2c:4b:ac:5d:3e:aa:21:ca:5f:46:1a:b9:14:2c:2f:b8:
+         e9:3d:8a:bd:19:ea:da:32:13:fc:02:9c:f7:f2:2b:99:56:20:
+         11:86:5b:7c:1b:ea:5a:0e:f4:bd:da:e2:44:ec:b9:71:7b:3a:
+         01:a3:d1:dc:bc:fc:52:49:6a:c8:f4:2c:27:45:ab:e6:65:bf:
+         75:75:1e:66:56:cc:82:71:95:7f:0b:da:8a:bf:2d:b6:7b:fd:
+         72:a2:68:f5:13:59:6f:ac:72:20:bf:59:0c:20:60:3d:46:6e:
+         d7:4c:83:90:42🆎04:b9:e1:e4:9f:1c:7e:1e:2f:96:32:b0:
+         89:6e
+</code></pre></td></tr></table>
+</div>
+</div><p>这里我们就可以看到一个 x509 格式的证书包含了哪些字段。这个对于理解证书很重要，所以详细分析一下</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">Issuer: <span class="nv">C</span> <span class="o">=</span> AU, <span class="nv">ST</span> <span class="o">=</span> Some-State, <span class="nv">O</span> <span class="o">=</span> Internet Widgits Pty Ltd, <span class="nv">CN</span> <span class="o">=</span> Fog
+Subject: <span class="nv">C</span> <span class="o">=</span> AU, <span class="nv">ST</span> <span class="o">=</span> Some-State, <span class="nv">O</span> <span class="o">=</span> Internet Widgits Pty Ltd, <span class="nv">CN</span> <span class="o">=</span> Fog
+</code></pre></td></tr></table>
+</div>
+</div><p>因为这是一个自签名的证书，所以 Issuer 和 Subject 的内容是一样（Issuer 表示是谁颁发的证书，而 Subject 表示这个证书属于谁）。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                RSA Public-Key: <span class="o">(</span><span class="m">1024</span> bit<span class="o">)</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>Public Key Info 告诉我们这个 Public Key 对应的加密算法是 RSA，秘钥为 1024 bit，然后明文附上了对应的秘钥（注意这是秘钥对里面的 public key）。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">        X509v3 extensions:
+            X509v3 Basic Constraints: critical
+                CA:TRUE
+</code></pre></td></tr></table>
+</div>
+</div><p>这里可以看到 CA 的值是 TRUE，表示这个证书可以作为 CA 证书使用。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">Signature Algorithm: sha256WithRSAEncryption
+</code></pre></td></tr></table>
+</div>
+</div><p>签名的算法为先用 sha256 做 hash 算法，然后再用 RSA 算法使用 Issuer 的 private key
+进行加密。</p>
+<h4 id="生成用户的私有密钥">生成用户的私有密钥</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">fog@tmp$ openssl genrsa -des3 -out my.key <span class="m">1024</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>生成用户的签名请求证书</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">fog@tmp$ openssl req -new -key my.key -out my.csr
+</code></pre></td></tr></table>
+</div>
+</div><p>由 CA 为请求证书签名</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">fog@tmp$ openssl x509 -req -CA ca.crt -CAkey ca.key -CAcreateserial -in my.csr -out my.crt -days <span class="m">365</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>现在再来看看这个生成的证书是什么样的</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">fog@tmp$ openssl x509 -noout -text -in my.crt
+Certificate:
+    Data:
+        Version: <span class="m">1</span> <span class="o">(</span>0x0<span class="o">)</span>
+        Serial Number:
+            14:a2:7c:94:fa:b8:0c:28:0d:9b:c3:86:44:3a:cf:40:0e:ea:71:c3
+        Signature Algorithm: sha256WithRSAEncryption
+        Issuer: <span class="nv">C</span> <span class="o">=</span> AU, <span class="nv">ST</span> <span class="o">=</span> Some-State, <span class="nv">O</span> <span class="o">=</span> Internet Widgits Pty Ltd, <span class="nv">CN</span> <span class="o">=</span> Fog
+        Validity
+            Not Before: Jul  <span class="m">5</span> 09:10:51 <span class="m">2022</span> GMT
+            Not After : Jul  <span class="m">5</span> 09:10:51 <span class="m">2023</span> GMT
+        Subject: <span class="nv">C</span> <span class="o">=</span> AU, <span class="nv">ST</span> <span class="o">=</span> Some-State, <span class="nv">O</span> <span class="o">=</span> Internet Widgits Pty Ltd, <span class="nv">CN</span> <span class="o">=</span> User
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                RSA Public-Key: <span class="o">(</span><span class="m">1024</span> bit<span class="o">)</span>
+                Modulus:
+                    00:bd:8c:96:bb:a7:3f:39:36:61:fa:41:d1:70:42:
+                    0f:b8:36:d4:3a:d2:0a:e1:85:f6:fe:25:d7:92:63:
+                    e3:a6:72:70:1d:93:e1:69:70:e7:38:7b:32:49:ae:
+                    bc:05:8e:9f:00:dd:9a:9c:c9:9b:62:97:a1:4f:c3:
+                    09:d8:5c:af:83:fa:fb:1f:fd:a9:32:74:4f:6b:a4:
+                    e7:52:d3:8d:bd:2e:1f:11:55:9e:b1:bf:fe:c6:6f:
+                    25💿d4:23:10:34:39:26:e2:37:eb:2f:83:84:91:
+                    d3:39:b4:d0:e1:4a:ab:c6:fd:96:98:4c:31:9f:b7:
+                    17:39:f4:08:09:77:11:51:53
+                Exponent: <span class="m">65537</span> <span class="o">(</span>0x10001<span class="o">)</span>
+    Signature Algorithm: sha256WithRSAEncryption
+         47:dd:5e:81:6a:f1:e8:8d:11:86:3d:4b:6e:30:51:64:af:30:
+         d4:e8:0d:c9:5e:07:f0:59:1d:f0:64:b9:e9:76:e1:66:61:59:
+         f9:b9:bc:21:92:93:db:13:6e:ec:08:3c:7f:6c:a4:96:a3:9e:
+         cf:76:fb:f6:8b:52:34:f4:dd:5f:56:97:df:98:c5:53:6c:97:
+         18:ef:8c:ce:09:77:43:27:04:f9:14:b2:4d:a1:7f:38:bb:fe:
+         4a:aa:45:1a:c3:f5:c5:46:f7:b8:fb:9a:cd:34:4e:1a:a5:3c:
+         28:b0:f7:57:28:7d:85:52:da:0f:48:b2:f5:90:7d:80:fa:76:
+         07:20
+</code></pre></td></tr></table>
+</div>
+</div><p>通过 Issuer 和 Subject 可以看出，这个证书是由 Fog（CA）颁发给 User 的。</p>
+<p>对于 private key 大多数时候我们不需要密码保护，可以通过以下命令来去除它</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">fog@tmp$ openssl rsa -in my.key -out myunsecure.key
+Enter pass phrase <span class="k">for</span> my.key:
+writing RSA key
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="reference">Reference</h2>
+<ul>
+<li><a href="https://stackoverflow.com/questions/4024393/difference-between-self-signed-ca-and-self-signed-certificate" target="_blank" rel="noopener noreffer">Difference between self-signed CA and self-signed certificate</a></li>
+<li><a href="https://www.linux.com/training-tutorials/tls-encryption-and-mutual-authentication-using-syslog-ng-open-source-edition/" target="_blank" rel="noopener noreffer">TLS encryption and mutual authentication using syslog-ng Open Source Edition</a></li>
+<li><a href="https://blog.gisspan.com/2016/04/making-sense-of-ssl-rsa-x509-and-csr.html" target="_blank" rel="noopener noreffer">Making sense of SSL, RSA, X509 and CSR</a></li>
+<li><a href="https://medium.com/@ebuschini/a-journey-into-verifying-signatures-on-x-509-certificates-168a5bafaa14" target="_blank" rel="noopener noreffer">A journey into verifying signatures on x.509 certificates</a></li>
+</ul>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>更新于 2022-07-05</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"><span>
+                            <a class="link-to-markdown" href="/security/index.md" target="_blank">阅读原始文档</a>
+                        </span></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://f0ghua.github.io/security/" data-title="信息安全技术入门"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://f0ghua.github.io/security/"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Hacker News" data-sharer="hackernews" data-url="https://f0ghua.github.io/security/" data-title="信息安全技术入门"><i class="fab fa-hacker-news fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://f0ghua.github.io/security/" data-title="信息安全技术入门"><i data-svg-src="https://cdn.jsdelivr.net/npm/simple-icons@2.14.0/icons/line.svg"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://f0ghua.github.io/security/" data-title="信息安全技术入门"><i class="fab fa-weibo fa-fw"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/strncpy/" class="prev" rel="prev" title="C 语言常用库函数-strncpy"><i class="fas fa-angle-left fa-fw"></i>C 语言常用库函数-strncpy</a></div>
+</div>
+<div id="comments"><div id="utterances"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://utteranc.es/">Utterances</a>.
+            </noscript></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2022</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">fog</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-arrow-up fa-fw"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="查看评论">
+                <i class="fas fa-comment fa-fw"></i>
+            </a>
+        </div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/css/lightgallery.min.css"><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/smooth-scroll@16.1.3/dist/smooth-scroll.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/autocomplete.js@0.37.1/dist/autocomplete.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/algoliasearch@4.2.0/dist/algoliasearch-lite.umd.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lazysizes@5.2.2/lazysizes.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/js/lightgallery.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lg-thumbnail.js@1.2.0/dist/lg-thumbnail.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lg-zoom.js@1.2.0/dist/lg-zoom.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sharer.js@0.4.0/sharer.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":10},"comment":{"utterances":{"darkTheme":"github-dark","issueTerm":"pathname","label":"","lightTheme":"github-light","repo":"f0ghua/hugo_comments"}},"lightGallery":{"actualSize":false,"exThumbImage":"data-thumbnail","hideBarsDelay":2000,"selector":".lightgallery","speed":400,"thumbContHeight":80,"thumbWidth":80,"thumbnail":true},"search":{"algoliaAppID":"I9I6IQKZY4","algoliaIndex":"index.cn","algoliaSearchKey":"604ef86245b2a95cadc730cb1dde0244","highlightTag":"em","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50,"type":"algolia"}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>

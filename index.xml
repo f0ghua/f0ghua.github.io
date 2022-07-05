@@ -3,15 +3,15 @@
         <title>Fog&#39;s Blog</title>
         <link>https://f0ghua.github.io/</link>
         <description>Technology sharing</description>
-        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Thu, 30 Jun 2022 23:46:00 &#43;0800</lastBuildDate>
+        <generator>Hugo -- gohugo.io</generator><language>zh-CN</language><copyright>This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.</copyright><lastBuildDate>Fri, 01 Jul 2022 09:11:00 &#43;0800</lastBuildDate>
             <atom:link href="https://f0ghua.github.io/index.xml" rel="self" type="application/rss+xml" />
         <item>
-    <title>证书原理简明</title>
-    <link>https://f0ghua.github.io/ca/</link>
-    <pubDate>Thu, 30 Jun 2022 23:46:00 &#43;0800</pubDate>
+    <title>信息安全技术入门</title>
+    <link>https://f0ghua.github.io/security/</link>
+    <pubDate>Fri, 01 Jul 2022 09:11:00 &#43;0800</pubDate>
     <author>作者</author>
-    <guid>https://f0ghua.github.io/ca/</guid>
-    <description><![CDATA[预备知识 CA 是 Certificate Authority 的缩写，也叫“证书授权中心”。数字证书实际上是存于计算机上的一个记录，是由 CA 签发的一个声明，证明证书主体（“证书申请者”被发]]></description>
+    <guid>https://f0ghua.github.io/security/</guid>
+    <description><![CDATA[谈到信息安全，我只能算是个门外汉。但是由于工作需求，经常也会接触一些，所以整理一下备查。顺便也把自己的一些心得分享出来。 关键字 我们在看跟安全]]></description>
 </item><item>
     <title>C 语言常用库函数-strncpy</title>
     <link>https://f0ghua.github.io/strncpy/</link>
@@ -19,6 +19,13 @@
     <author>作者</author>
     <guid>https://f0ghua.github.io/strncpy/</guid>
     <description><![CDATA[函数原型 1 2 3 #include &lt;string.h&gt; char *strncpy(char *dest, const char *src, size_t n); 用法分析 strncpy 由于添加了长度限制，避免了缓冲区溢出的问题。但在使用这个函数的时候必须要注意: strncpy 只有在源字符串的]]></description>
+</item><item>
+    <title>无线协议学习笔录</title>
+    <link>https://f0ghua.github.io/wireless/</link>
+    <pubDate>Mon, 07 Feb 2022 13:56:00 &#43;0800</pubDate>
+    <author>作者</author>
+    <guid>https://f0ghua.github.io/wireless/</guid>
+    <description><![CDATA[概述 从一次正常的连接说起 先从一次简单的连接看起。测试环境就是一台无线 STA 和一个 AP，以及一台用来抓包的 PC 。 1 2 3 4 5 6 7 8 9 10 +--------+ +-------+ | STA | | AP |]]></description>
 </item><item>
     <title>C 语言常用库函数-sprintf</title>
     <link>https://f0ghua.github.io/sprintf/</link>
