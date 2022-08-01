@@ -1,0 +1,1392 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+        <title>内核空间和用户文件通信 - proc 虚拟文件系统 - Fog&#39;s Blog</title><meta name="Description" content="Technology sharing"><meta property="og:title" content="内核空间和用户文件通信 - proc 虚拟文件系统" />
+<meta property="og:description" content="概述 使用 proc 虚拟文件系统来在内核空间和用户空间交换数据应该是最常用的一种方式了。我们可以在 /proc 目录下创建一个虚拟的文件，通过读写这个文件实现用户" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://f0ghua.github.io/linux_proc/" /><meta property="og:image" content="https://f0ghua.github.io/logo.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2022-08-01T17:42:00+08:00" />
+<meta property="article:modified_time" content="2022-08-01T17:44:31+08:00" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://f0ghua.github.io/logo.png"/>
+
+<meta name="twitter:title" content="内核空间和用户文件通信 - proc 虚拟文件系统"/>
+<meta name="twitter:description" content="概述 使用 proc 虚拟文件系统来在内核空间和用户空间交换数据应该是最常用的一种方式了。我们可以在 /proc 目录下创建一个虚拟的文件，通过读写这个文件实现用户"/>
+<meta name="application-name" content="Fog&#39;s Blog">
+<meta name="apple-mobile-web-app-title" content="Fog&#39;s Blog"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://f0ghua.github.io/linux_proc/" /><link rel="prev" href="https://f0ghua.github.io/security/" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "内核空间和用户文件通信 - proc 虚拟文件系统",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/f0ghua.github.io\/linux_proc\/"
+        },"image": ["https:\/\/f0ghua.github.io\/images\/Apple-Devices-Preview.png"],"genre": "posts","wordcount":  5490 ,
+        "url": "https:\/\/f0ghua.github.io\/linux_proc\/","datePublished": "2022-08-01T17:42:00+08:00","dateModified": "2022-08-01T17:44:31+08:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
+            "@type": "Organization",
+            "name": "xxxx","logo": "https:\/\/f0ghua.github.io\/images\/avatar.png"},"author": {
+                "@type": "Person",
+                "name": "fog"
+            },"description": ""
+    }
+    </script></head>
+    <body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('auto' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'auto' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Fog&#39;s Blog"><span class="header-title-pre"><i class='far fa-kiss-wink-heart fa-fw'></i></span>Fog&#39;s Blog</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 所有文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><a class="menu-item" href="/categories/documentation/"> 文档 </a><a class="menu-item" href="/about/"> 关于 </a><a class="menu-item" href="https://github.com/dillonzq/LoveIt" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><a href="javascript:void(0);" class="menu-item language" title="选择语言">简体中文<i class="fas fa-chevron-right fa-fw"></i>
+                        <select class="language-select" id="language-select-desktop" onchange="location = this.value;"><option value="/linux_proc/" selected>简体中文</option></select>
+                    </a><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Fog&#39;s Blog"><span class="header-title-pre"><i class='far fa-kiss-wink-heart fa-fw'></i></span>Fog&#39;s Blog</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">所有文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a class="menu-item" href="/categories/documentation/" title="">文档</a><a class="menu-item" href="/about/" title="">关于</a><a class="menu-item" href="https://github.com/dillonzq/LoveIt" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a><a href="javascript:void(0);" class="menu-item" title="选择语言">简体中文<i class="fas fa-chevron-right fa-fw"></i>
+                    <select class="language-select" onchange="location = this.value;"><option value="/linux_proc/" selected>简体中文</option></select>
+                </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animated flipInX">内核空间和用户文件通信 - proc 虚拟文件系统</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>fog</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-08-01">2022-08-01</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 5490 字&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 11 分钟&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>目录</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#概述">概述</a></li>
+    <li><a href="#代码示例">代码示例</a></li>
+    <li><a href="#使用说明">使用说明</a>
+      <ul>
+        <li><a href="#关键接口函数和结构">关键接口函数和结构</a></li>
+        <li><a href="#深入-procfile-read">深入 procfile_read</a></li>
+        <li><a href="#接口函数的演变">接口函数的演变</a></li>
+      </ul>
+    </li>
+    <li><a href="#高级应用">高级应用</a>
+      <ul>
+        <li><a href="#数据量大于-page-size">数据量大于 PAGE_SIZE</a></li>
+      </ul>
+    </li>
+    <li><a href="#proc-专用接口">proc 专用接口</a>
+      <ul>
+        <li><a href="#实例说明">实例说明</a>
+          <ul>
+            <li><a href="#传输数据量小于等于一个-page-size">传输数据量小于等于一个 PAGE_SIZE</a></li>
+            <li><a href="#传输数据量大于一个-page-size">传输数据量大于一个 PAGE_SIZE</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#参考">参考</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><h2 id="概述">概述</h2>
+<p>使用 proc 虚拟文件系统来在内核空间和用户空间交换数据应该是最常用的一种方式了。我们可以在 <code>/proc</code> 目录下创建一个虚拟的文件，通过读写这个文件实现用户空间和内核空间的数据交互。</p>
+<p><strong>需要说明的是，虽然这里我们只讨论 procfs，但是在在新一些的 linux kernel 中我们应该使用 sysfs 来替代 procfs 作为 driver 和 user space 的接口。</strong></p>
+<h2 id="代码示例">代码示例</h2>
+<p>废话不多说，先上例子。（例子是基于 linux 3.9.9 测试的，但是理论上适用于到目前为止的所有 kernel 版本）</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span><span class="lnt">110
+</span><span class="lnt">111
+</span><span class="lnt">112
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="cm">/*
+</span><span class="cm"> * procfs1.c
+</span><span class="cm"> */</span>
+
+<span class="cp">#include</span> <span class="cpf">&lt;linux/kernel.h&gt;		/* We&#39;re doing kernel work */</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;linux/module.h&gt;		/* Specifically, a module */</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;linux/proc_fs.h&gt;		/* Necessary because we use the proc fs */</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;linux/uaccess.h&gt;		/* for copy_from_user */</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;linux/version.h&gt;</span><span class="cp">
+</span><span class="cp"></span>
+<span class="cp">#if LINUX_VERSION_CODE &gt;= KERNEL_VERSION(5, 6, 0)
+</span><span class="cp">#define HAVE_PROC_OPS
+</span><span class="cp">#endif
+</span><span class="cp"></span>
+<span class="cp">#if LINUX_VERSION_CODE &lt; KERNEL_VERSION(3, 10, 0)
+</span><span class="cp">#define HAVE_PROC_READ_SUITE
+</span><span class="cp">#endif
+</span><span class="cp"></span>
+<span class="cp">#define PROCFS_MAX_SIZE		1024
+</span><span class="cp">#define PROCFS_NAME			&#34;pbuf&#34;
+</span><span class="cp"></span>
+<span class="cm">/* This structure hold information about the /proc file */</span>
+<span class="k">static</span> <span class="k">struct</span> <span class="n">proc_dir_entry</span> <span class="o">*</span><span class="n">our_proc_file</span><span class="p">;</span>
+
+<span class="cm">/* The buffer used to store character for this module */</span>
+<span class="k">static</span> <span class="kt">char</span> <span class="n">procfs_buffer</span><span class="p">[</span><span class="n">PROCFS_MAX_SIZE</span><span class="p">];</span>
+<span class="cm">/* The size of the buffer */</span>
+<span class="k">static</span> <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">procfs_buffer_size</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+<span class="k">static</span> <span class="n">ssize_t</span> <span class="nf">procfile_read</span><span class="p">(</span><span class="k">struct</span> <span class="n">file</span> <span class="o">*</span><span class="n">file</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="n">__user</span> <span class="o">*</span><span class="n">buff</span><span class="p">,</span>
+                             <span class="n">size_t</span> <span class="n">len</span><span class="p">,</span> <span class="n">loff_t</span> <span class="o">*</span><span class="n">off</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="kt">int</span> <span class="n">plen</span> <span class="o">=</span> <span class="n">procfs_buffer_size</span><span class="p">;</span>
+    <span class="n">ssize_t</span> <span class="n">ret</span> <span class="o">=</span> <span class="n">plen</span><span class="p">;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="o">*</span><span class="n">off</span> <span class="o">&gt;=</span> <span class="n">plen</span> <span class="o">||</span> <span class="n">copy_to_user</span><span class="p">(</span><span class="n">buff</span><span class="p">,</span> <span class="n">procfs_buffer</span><span class="p">,</span> <span class="n">plen</span><span class="p">))</span> <span class="p">{</span>
+        <span class="n">pr_info</span><span class="p">(</span><span class="s">&#34;copy_to_user failed</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="n">pr_info</span><span class="p">(</span><span class="s">&#34;procfile read %s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">file</span><span class="o">-&gt;</span><span class="n">f_path</span><span class="p">.</span><span class="n">dentry</span><span class="o">-&gt;</span><span class="n">d_name</span><span class="p">.</span><span class="n">name</span><span class="p">);</span>
+        <span class="o">*</span><span class="n">off</span> <span class="o">+=</span> <span class="n">plen</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">ret</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="cm">/*
+</span><span class="cm">cat /dev/zero | tr &#34;\0&#34; &#34;a&#34; | dd of=/tmp/1.txt bs=1023 count=1
+</span><span class="cm">cat /tmp/1.txt &gt; /proc/pbuf
+</span><span class="cm">*/</span>
+<span class="k">static</span> <span class="n">ssize_t</span> <span class="nf">procfile_write</span><span class="p">(</span><span class="k">struct</span> <span class="n">file</span> <span class="o">*</span><span class="n">file</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="n">__user</span> <span class="o">*</span><span class="n">buff</span><span class="p">,</span>
+                              <span class="n">size_t</span> <span class="n">len</span><span class="p">,</span> <span class="n">loff_t</span> <span class="o">*</span><span class="n">off</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">procfs_buffer_size</span> <span class="o">=</span> <span class="n">len</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">procfs_buffer_size</span> <span class="o">&gt;</span> <span class="n">PROCFS_MAX_SIZE</span><span class="p">)</span>
+        <span class="n">procfs_buffer_size</span> <span class="o">=</span> <span class="n">PROCFS_MAX_SIZE</span><span class="p">;</span>
+
+	<span class="k">if</span> <span class="p">(</span><span class="n">copy_from_user</span><span class="p">(</span><span class="n">procfs_buffer</span><span class="p">,</span> <span class="n">buff</span><span class="p">,</span> <span class="n">procfs_buffer_size</span><span class="p">))</span> <span class="p">{</span>
+		<span class="n">pr_info</span><span class="p">(</span><span class="s">&#34;copy_from_user failed</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+        <span class="k">return</span> <span class="o">-</span><span class="n">EFAULT</span><span class="p">;</span>
+	<span class="p">}</span>
+
+	<span class="cm">/* supports only max to 1023 bytes string */</span>
+	<span class="n">procfs_buffer</span><span class="p">[</span><span class="n">procfs_buffer_size</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">PROCFS_MAX_SIZE</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="sc">&#39;\0&#39;</span><span class="p">;</span>
+    <span class="n">pr_info</span><span class="p">(</span><span class="s">&#34;procfile write %s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">procfs_buffer</span><span class="p">);</span>
+
+    <span class="k">return</span> <span class="n">procfs_buffer_size</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="cp">#ifdef HAVE_PROC_OPS
+</span><span class="cp"></span><span class="k">static</span> <span class="k">const</span> <span class="k">struct</span> <span class="n">proc_ops</span> <span class="n">proc_file_fops</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="p">.</span><span class="n">proc_read</span> <span class="o">=</span> <span class="n">procfile_read</span><span class="p">,</span>
+	<span class="p">.</span><span class="n">proc_write</span> <span class="o">=</span> <span class="n">procfile_write</span><span class="p">,</span>
+<span class="p">};</span>
+<span class="cp">#else
+</span><span class="cp"></span><span class="k">static</span> <span class="k">const</span> <span class="k">struct</span> <span class="n">file_operations</span> <span class="n">proc_file_fops</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="p">.</span><span class="n">read</span> <span class="o">=</span> <span class="n">procfile_read</span><span class="p">,</span>
+	<span class="p">.</span><span class="n">write</span> <span class="o">=</span> <span class="n">procfile_write</span><span class="p">,</span>
+<span class="p">};</span>
+<span class="cp">#endif
+</span><span class="cp"></span>
+<span class="k">static</span> <span class="kt">int</span> <span class="n">__init</span> <span class="nf">procfs1_init</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">our_proc_file</span> <span class="o">=</span> <span class="n">proc_create</span><span class="p">(</span><span class="n">PROCFS_NAME</span><span class="p">,</span> <span class="mo">0644</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">proc_file_fops</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">NULL</span> <span class="o">==</span> <span class="n">our_proc_file</span><span class="p">)</span> <span class="p">{</span>
+<span class="cp">#ifdef HAVE_PROC_READ_SUITE
+</span><span class="cp"></span>		<span class="n">remove_proc_entry</span><span class="p">(</span><span class="n">PROCFS_NAME</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+<span class="cp">#else
+</span><span class="cp"></span>        <span class="n">proc_remove</span><span class="p">(</span><span class="n">our_proc_file</span><span class="p">);</span>
+<span class="cp">#endif
+</span><span class="cp"></span>        <span class="n">pr_alert</span><span class="p">(</span><span class="s">&#34;Error:Could not initialize /proc/%s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">PROCFS_NAME</span><span class="p">);</span>
+        <span class="k">return</span> <span class="o">-</span><span class="n">ENOMEM</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="n">pr_info</span><span class="p">(</span><span class="s">&#34;/proc/%s created</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">PROCFS_NAME</span><span class="p">);</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">static</span> <span class="kt">void</span> <span class="n">__exit</span> <span class="nf">procfs1_exit</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="cp">#ifdef HAVE_PROC_READ_SUITE
+</span><span class="cp"></span>		<span class="n">remove_proc_entry</span><span class="p">(</span><span class="n">PROCFS_NAME</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+<span class="cp">#else
+</span><span class="cp"></span>        <span class="n">proc_remove</span><span class="p">(</span><span class="n">our_proc_file</span><span class="p">);</span>
+<span class="cp">#endif
+</span><span class="cp"></span>    <span class="n">pr_info</span><span class="p">(</span><span class="s">&#34;/proc/%s removed</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">PROCFS_NAME</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="n">module_init</span><span class="p">(</span><span class="n">procfs1_init</span><span class="p">);</span>
+<span class="n">module_exit</span><span class="p">(</span><span class="n">procfs1_exit</span><span class="p">);</span>
+
+<span class="n">MODULE_LICENSE</span><span class="p">(</span><span class="s">&#34;GPL&#34;</span><span class="p">);</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>为了测试方便 Makefile 也随手贴一下，注意路径自己定义</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-makefile" data-lang="makefile"><span class="nv">KERNEL_DIR</span><span class="o">=</span>
+<span class="nv">ARCH</span><span class="o">=</span>
+<span class="nv">CROSS_COMPILE</span><span class="o">=</span>
+
+<span class="nv">obj-m</span> <span class="o">+=</span> procfs1.o
+<span class="nv">ccflags-y</span> <span class="o">:=</span> -g -DDEBUG
+
+<span class="nf">.PHONY</span><span class="o">:</span> <span class="n">all</span> <span class="n">clean</span>
+
+<span class="nv">PWD</span> <span class="o">:=</span> <span class="k">$(</span>CURDIR<span class="k">)</span>
+
+<span class="nf">all</span><span class="o">:</span>
+        <span class="k">$(</span>MAKE<span class="k">)</span> -C <span class="s1">&#39;$(KERNEL_DIR)&#39;</span> <span class="nv">M</span><span class="o">=</span><span class="s1">&#39;$(PWD)&#39;</span> <span class="nv">ARCH</span><span class="o">=</span><span class="k">$(</span>ARCH<span class="k">)</span> <span class="nv">CROSS_COMPILE</span><span class="o">=</span><span class="k">$(</span>CROSS_COMPILE<span class="k">)</span> <span class="nv">V</span><span class="o">=</span><span class="m">1</span> modules
+
+<span class="nf">clean</span><span class="o">:</span>
+        <span class="k">$(</span>MAKE<span class="k">)</span> -C <span class="s1">&#39;$(KERNEL_DIR)&#39;</span> <span class="nv">M</span><span class="o">=</span><span class="s1">&#39;$(PWD)&#39;</span> clean
+</code></pre></td></tr></table>
+</div>
+</div><p>编译后会生成模块文件 procfs1.ko 。在对应的 linux guest 机器上测试</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">$ insmod procfs1.ko
+$ <span class="nb">echo</span> <span class="s1">&#39;HelloWorld!&#39;</span> &gt; /proc/pbuf
+procfile write HelloWorld!
+
+$ cat /proc/pbuf
+procfile <span class="nb">read</span> pbuf
+HelloWorld!
+copy_to_user failed
+copy_to_user failed
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="使用说明">使用说明</h2>
+<h3 id="关键接口函数和结构">关键接口函数和结构</h3>
+<p>从上例可以看出，创建一个 proc 虚拟文件包含了以下的几个步骤</p>
+<ul>
+<li>
+<p>定义一个 <code>struct proc_ops</code> 或者 <code>struct file_operations</code> 的实例，read 和 write
+的函数指向自定义的 <code>procfile_read</code> 和 <code>procfile_write</code> 回调函数</p>
+</li>
+<li>
+<p>调用函数 <code>proc_create</code> 创建一个虚拟文件，并将参数 proc_fops 对应的 <code>struct file_operations</code> 实例与之关联</p>
+</li>
+<li>
+<p>实现读写的回调函数 <code>procfile_read</code> 和 <code>procfile_write</code></p>
+</li>
+<li>
+<p>在模块退出时，调用函数 <code>remove_proc_entry</code> 或者 <code>proc_remove</code> 将 proc 虚拟文件删除</p>
+</li>
+</ul>
+<p>对应的几个函数都可以在头文件 <a href="https://github.com/torvalds/linux/blob/v3.9/include/linux/proc_fs.h" target="_blank" rel="noopener noreffer">include/linux/proc_fs.h</a> 中找到声明</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="k">struct</span> <span class="n">proc_dir_entry</span> <span class="o">*</span><span class="nf">proc_create_data</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">name</span><span class="p">,</span> <span class="n">umode_t</span> <span class="n">mode</span><span class="p">,</span>
+				<span class="k">struct</span> <span class="n">proc_dir_entry</span> <span class="o">*</span><span class="n">parent</span><span class="p">,</span>
+				<span class="k">const</span> <span class="k">struct</span> <span class="n">file_operations</span> <span class="o">*</span><span class="n">proc_fops</span><span class="p">,</span>
+				<span class="kt">void</span> <span class="o">*</span><span class="n">data</span><span class="p">);</span>
+<span class="k">static</span> <span class="kr">inline</span> <span class="k">struct</span> <span class="n">proc_dir_entry</span> <span class="o">*</span><span class="nf">proc_create</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">name</span><span class="p">,</span> <span class="n">umode_t</span> <span class="n">mode</span><span class="p">,</span>
+	<span class="k">struct</span> <span class="n">proc_dir_entry</span> <span class="o">*</span><span class="n">parent</span><span class="p">,</span> <span class="k">const</span> <span class="k">struct</span> <span class="n">file_operations</span> <span class="o">*</span><span class="n">proc_fops</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="k">return</span> <span class="n">proc_create_data</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">proc_fops</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="k">extern</span> <span class="kt">void</span> <span class="nf">remove_proc_entry</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">name</span><span class="p">,</span> <span class="k">struct</span> <span class="n">proc_dir_entry</span> <span class="o">*</span><span class="n">parent</span><span class="p">);</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>主要的数据结构则是 <code>struct proc_dir_entry</code></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="k">struct</span> <span class="n">proc_dir_entry</span> <span class="p">{</span>
+	<span class="c1">// ...
+</span><span class="c1"></span>	<span class="k">const</span> <span class="k">struct</span> <span class="n">inode_operations</span> <span class="o">*</span><span class="n">proc_iops</span><span class="p">;</span>
+    <span class="k">const</span> <span class="k">struct</span> <span class="n">file_operations</span> <span class="o">*</span><span class="n">proc_dir_ops</span><span class="p">;</span>
+
+    <span class="c1">// ...
+</span><span class="c1"></span><span class="p">};</span>
+
+<span class="k">struct</span> <span class="n">file_operations</span> <span class="p">{</span>
+    <span class="c1">// ...
+</span><span class="c1"></span>	<span class="n">ssize_t</span> <span class="p">(</span><span class="o">*</span><span class="n">read</span><span class="p">)</span> <span class="p">(</span><span class="k">struct</span> <span class="n">file</span> <span class="o">*</span><span class="p">,</span> <span class="kt">char</span> <span class="n">__user</span> <span class="o">*</span><span class="p">,</span> <span class="n">size_t</span><span class="p">,</span> <span class="n">loff_t</span> <span class="o">*</span><span class="p">);</span>
+	<span class="n">ssize_t</span> <span class="p">(</span><span class="o">*</span><span class="n">write</span><span class="p">)</span> <span class="p">(</span><span class="k">struct</span> <span class="n">file</span> <span class="o">*</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="n">__user</span> <span class="o">*</span><span class="p">,</span> <span class="n">size_t</span><span class="p">,</span> <span class="n">loff_t</span> <span class="o">*</span><span class="p">);</span>
+    <span class="c1">// ...
+</span><span class="c1"></span><span class="p">};</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>从上面的分析可以知道，最重要的就是 <code>procfile_read</code> 和 <code>procfile_write</code> 两个回调函数了。write 函数的参数说明如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="cm">/*
+</span><span class="cm">
+</span><span class="cm">procfile_write函数将数据从用户空间的buff 中拷贝到文件的 (*off) 位置处。
+</span><span class="cm">
+</span><span class="cm">file: [IN] 文件指针
+</span><span class="cm">
+</span><span class="cm">buff: [IN] 需要写入文件的数据起始指针。注意这个buff是在user space的，所以需要使
+</span><span class="cm">      用copy_from_user 拷贝到内核空间。同时需要注意 copy_from_user 函数返回的是
+</span><span class="cm">      还没有被拷贝到用户空间去的数据长度，而不是像一般的返回拷贝成功的长度。
+</span><span class="cm">
+</span><span class="cm">len: [IN] 需要写入的数据长度
+</span><span class="cm">
+</span><span class="cm">off: [IN/OUT] 表示文件的偏移地址offset。数据应该从 buff 的位置开始写入到文件的
+</span><span class="cm">     (*off) 偏移出。每一次被调用后，函数需要根据写入的数据长度调整 (*off) 的值。
+</span><span class="cm">
+</span><span class="cm">return: 成功写入的数据长度
+</span><span class="cm">*/</span>
+<span class="k">static</span> <span class="n">ssize_t</span> <span class="n">procfile_write</span><span class="p">(</span><span class="k">struct</span> <span class="n">file</span> <span class="o">*</span><span class="n">file</span><span class="p">,</span>
+							  <span class="k">const</span> <span class="kt">char</span> <span class="n">__user</span> <span class="o">*</span><span class="n">buff</span><span class="p">,</span>
+                              <span class="n">size_t</span> <span class="n">len</span><span class="p">,</span>
+							  <span class="n">loff_t</span> <span class="o">*</span><span class="n">off</span><span class="p">)</span>
+
+<span class="cm">/*
+</span><span class="cm">procfile_read 函数负责从文件的（*off）位置拷贝数据到用户空间的 buff 中去。
+</span><span class="cm">
+</span><span class="cm">file: [IN] 文件指针
+</span><span class="cm">
+</span><span class="cm">buff: [OUT] 需要读出的数据的存放位置。注意这个buff是在user space的，所以需要使用
+</span><span class="cm">      copy_to_user 拷贝到用户空间。同时需要注意 copy_to_user 函数返回的是还没有
+</span><span class="cm">      被拷贝到用户空间去的数据长度，而不是像一般的返回拷贝成功的长度。
+</span><span class="cm">
+</span><span class="cm">len: [IN] 需要读取的数据长度
+</span><span class="cm">
+</span><span class="cm">off: [IN/OUT] 表示文件的偏移地址offset。数据应该从文件的(*off) 偏移处读取到 buff
+</span><span class="cm">     中。每一次被调用后，函数需要根据已经读取的数据长度调整 (*off) 的值。
+</span><span class="cm">
+</span><span class="cm">return: 成功读取的数据长度
+</span><span class="cm">*/</span>
+<span class="k">static</span> <span class="n">ssize_t</span> <span class="n">procfile_read</span><span class="p">(</span><span class="k">struct</span> <span class="n">file</span> <span class="o">*</span><span class="n">file</span><span class="p">,</span>
+							 <span class="k">const</span> <span class="kt">char</span> <span class="n">__user</span> <span class="o">*</span><span class="n">buff</span><span class="p">,</span>
+                             <span class="n">size_t</span> <span class="n">len</span><span class="p">,</span>
+							 <span class="n">loff_t</span> <span class="o">*</span><span class="n">off</span><span class="p">)</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>这两个函数的具体说明可以参考 <a href="https://lwn.net/Kernel/LDD3/" target="_blank" rel="noopener noreffer">Linux Device Drivers, Third Edition</a> 的第三章讲解的
+read 和 write 函数部分，大同小异。</p>
+<h3 id="深入-procfile-read">深入 procfile_read</h3>
+<p>了解了接口函数的使用，我们可以回到先前的例子再仔细分析一下输出。可以看到在 <code>cat /proc/pbuf</code> 的时候打印了两次的 &ldquo;copy_to_user failed&rdquo;。为什么会打印两次呢？</p>
+<p>因为 cat 默认是使用 sendfile 函数来直接在 kernel space 中从 <code>/proc/pbuf</code> 文件传递数据到 stdout 的。只有当 sendfile 返回值为 0（eof）的时候 cat 才会退出。</p>
+<p>对于 <code>/proc/pbuf</code> 文件的读回调函数来说，其调用栈如下</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="m">1</span>  procfile_read            procfs1.c    <span class="m">30</span>   0xc87e602a
+<span class="m">2</span>  proc_reg_read            inode.c      <span class="m">197</span>  0xc10c82d8
+<span class="m">3</span>  do_loop_readv_writev     read_write.c <span class="m">636</span>  0xc108d7a9
+<span class="m">4</span>  do_readv_writev          read_write.c <span class="m">768</span>  0xc108d9ac
+<span class="m">5</span>  vfs_readv                read_write.c <span class="m">790</span>  0xc108d9eb
+<span class="m">6</span>  kernel_readv             splice.c     <span class="m">567</span>  0xc10ab12d
+<span class="m">7</span>  default_file_splice_read splice.c     <span class="m">643</span>  0xc10ac9e6
+<span class="m">8</span>  do_splice_to             splice.c     <span class="m">1146</span> 0xc10ab496
+<span class="m">9</span>  splice_direct_to_actor   splice.c     <span class="m">1217</span> 0xc10ab561
+<span class="m">10</span> do_splice_direct         splice.c     <span class="m">1307</span> 0xc10acce2
+<span class="m">11</span> do_sendfile              read_write.c <span class="m">968</span>  0xc108ddff
+<span class="m">12</span> sys_sendfile64           read_write.c <span class="m">1023</span> 0xc108dfde
+<span class="m">13</span> ia32_sysenter_target     entry_32.S   <span class="m">439</span>  0xc12733be
+<span class="m">14</span> ??                                         0xffffe424
+<span class="m">15</span> ??                                         0x804fd47
+<span class="m">16</span> ??                                         0x80e9616
+</code></pre></td></tr></table>
+</div>
+</div><p>由于函数 <code>splice_direct_to_actor</code> 中会循环调用 <code>do_splice_to</code> 函数来传递数据，直到返回值为 0 （也就是 <code>/proc/pbuf</code> 的读回调函数返回 0）。所以其实 <code>do_sendfile</code>
+被调用了 2 次，而 <code>procfile_read</code> 则被调用了 3 次。过程如下所示：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">- do_sendfile <span class="o">(</span><span class="k">return</span> 13<span class="o">)</span>
+  - procfile_read <span class="o">(</span><span class="k">return</span> 13<span class="o">)</span>
+  - procfile_read <span class="o">(</span><span class="k">return</span> 0<span class="o">)</span>
+- do_sendfile <span class="o">(</span><span class="k">return</span> 0<span class="o">)</span>
+  - procfile_read <span class="o">(</span><span class="k">return</span> 0<span class="o">)</span>
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="接口函数的演变">接口函数的演变</h3>
+<p>为什么在上面的示例代码里那么多的宏？这是因为随着 linux kernel 的不断更新，proc
+虚拟文件的使用方式也发生了多次变化。最重要的变化如下表所示（参见头文件
+<a href="https://github.com/torvalds/linux/blob/master/include/linux/proc_fs.h" target="_blank" rel="noopener noreffer">include/linux/proc_fs.h</a> ）</p>
+<table>
+<thead>
+<tr>
+<th>VERSION</th>
+<th>CHANGE</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>v3.10</td>
+<td>remove read_proc and write_proc from struct proc_dir_entry</td>
+</tr>
+<tr>
+<td>v5.6</td>
+<td>use &lsquo;struct proc_ops&rsquo; to instead of &lsquo;struct file_operation&rsquo;</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>翻看 3.10 以前的 linux kernel，可以看到 proc 文件系统的核心数据结构 proc_dir_entry
+如下所示：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="k">struct</span> <span class="n">proc_dir_entry</span> <span class="p">{</span>
+    <span class="c1">// ...
+</span><span class="c1"></span>	<span class="k">const</span> <span class="k">struct</span> <span class="n">inode_operations</span> <span class="o">*</span><span class="n">proc_iops</span><span class="p">;</span> <span class="c1">// Inode operations functions
+</span><span class="c1"></span>	<span class="k">const</span> <span class="k">struct</span> <span class="n">file_operations</span> <span class="o">*</span><span class="n">proc_fops</span><span class="p">;</span>  <span class="c1">// File operations functions
+</span><span class="c1"></span>    <span class="c1">// ...
+</span><span class="c1"></span>	<span class="n">read_proc_t</span> <span class="o">*</span><span class="n">read_proc</span><span class="p">;</span>                   <span class="c1">// proc read function
+</span><span class="c1"></span>	<span class="n">write_proc_t</span> <span class="o">*</span><span class="n">write_proc</span><span class="p">;</span>                 <span class="c1">// proc write function
+</span><span class="c1"></span>    <span class="c1">// ...
+</span><span class="c1"></span><span class="p">};</span>
+
+<span class="k">struct</span> <span class="n">file_operations</span> <span class="p">{</span>
+    <span class="c1">// ...
+</span><span class="c1"></span>	<span class="n">ssize_t</span> <span class="p">(</span><span class="o">*</span><span class="n">read</span><span class="p">)</span> <span class="p">(</span><span class="k">struct</span> <span class="n">file</span> <span class="o">*</span><span class="p">,</span> <span class="kt">char</span> <span class="n">__user</span> <span class="o">*</span><span class="p">,</span> <span class="n">size_t</span><span class="p">,</span> <span class="n">loff_t</span> <span class="o">*</span><span class="p">);</span>
+	<span class="n">ssize_t</span> <span class="p">(</span><span class="o">*</span><span class="n">write</span><span class="p">)</span> <span class="p">(</span><span class="k">struct</span> <span class="n">file</span> <span class="o">*</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="n">__user</span> <span class="o">*</span><span class="p">,</span> <span class="n">size_t</span><span class="p">,</span> <span class="n">loff_t</span> <span class="o">*</span><span class="p">);</span>
+    <span class="c1">// ...
+</span><span class="c1"></span><span class="p">};</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>也就是说读写文件可以通过两种方式进行</p>
+<ul>
+<li>A. 通过调用 proc 提供的函数指针接口 <code>read_proc</code> 和 <code>write_proc</code></li>
+<li>B. 通过标准的文件系统接口 <code>proc_fops-&gt;read</code> 和 <code>proc_fops-&gt;write</code></li>
+</ul>
+<p>再看下 5.6 的数据结构（ <a href="https://github.com/torvalds/linux/blob/v5.6/fs/proc/internal.h" target="_blank" rel="noopener noreffer">fs/proc/internal.h</a> ）</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="k">struct</span> <span class="n">proc_dir_entry</span> <span class="p">{</span>
+	<span class="c1">// ...
+</span><span class="c1"></span>	<span class="k">const</span> <span class="k">struct</span> <span class="n">inode_operations</span> <span class="o">*</span><span class="n">proc_iops</span><span class="p">;</span>
+	<span class="k">union</span> <span class="p">{</span>
+		<span class="k">const</span> <span class="k">struct</span> <span class="n">proc_ops</span> <span class="o">*</span><span class="n">proc_ops</span><span class="p">;</span>
+		<span class="k">const</span> <span class="k">struct</span> <span class="n">file_operations</span> <span class="o">*</span><span class="n">proc_dir_ops</span><span class="p">;</span>
+	<span class="p">};</span>
+    <span class="c1">// ...
+</span><span class="c1"></span><span class="p">};</span>
+
+<span class="k">struct</span> <span class="n">proc_ops</span> <span class="p">{</span>
+	<span class="c1">// ...
+</span><span class="c1"></span>	<span class="n">ssize_t</span>	<span class="p">(</span><span class="o">*</span><span class="n">proc_read</span><span class="p">)(</span><span class="k">struct</span> <span class="n">file</span> <span class="o">*</span><span class="p">,</span> <span class="kt">char</span> <span class="n">__user</span> <span class="o">*</span><span class="p">,</span> <span class="n">size_t</span><span class="p">,</span> <span class="n">loff_t</span> <span class="o">*</span><span class="p">);</span>
+	<span class="n">ssize_t</span>	<span class="p">(</span><span class="o">*</span><span class="n">proc_write</span><span class="p">)(</span><span class="k">struct</span> <span class="n">file</span> <span class="o">*</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="n">__user</span> <span class="o">*</span><span class="p">,</span> <span class="n">size_t</span><span class="p">,</span> <span class="n">loff_t</span> <span class="o">*</span><span class="p">);</span>
+    <span class="c1">// ...
+</span><span class="c1"></span><span class="p">}</span> <span class="n">__randomize_layout</span><span class="p">;</span>
+
+</code></pre></td></tr></table>
+</div>
+</div><p>可以发现， <code>read_proc</code> 和 <code>write_proc</code> 接口被移除了；同时多了一个 struct
+proc_ops 结构指针。之所以把原来的 <code>struct file_operations</code> 替换为 <code>struct proc_ops</code> ，原因是 <code>struct file_operations</code> 包含了很多 VFS 不需要的成员；替换成
+<code>struct proc_ops</code> 作为 proc VFS 专用的结构体，可以避免在 <code>struct file_operations</code> 增加新功能的时候影响 proc VFS，也可以通过在 <code>struct proc_ops</code>
+中添加特定的一些成员来扩展 proc VFS 的功能。</p>
+<p>由于 <code>proc_ops-&gt;proc_read</code> 和 <code>proc_ops-&gt;proc_write</code> 函数原型和
+<code>file_operations-&gt;read</code> ， <code>file_operations-&gt;write</code> 完全一样。所以最佳使用方式应该是通过文件系统来读取 proc 的虚拟文件。这样不管是 5.6 之前的 file_operations 或者之后的 proc_ops 都可以使用一样的 read write 函数了。</p>
+<h2 id="高级应用">高级应用</h2>
+<h3 id="数据量大于-page-size">数据量大于 PAGE_SIZE</h3>
+<p>如果仔细阅读上面的代码就会注意到，这个例子中的 readfile_proc 只能支持数据量小于等于一个 PAGE_SIZE 的情形。如果需要读取大于一个 PAGE_SIZE 的数据，那么函数应该怎么写呢？示例如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="cp">#define PROCFS_MAX_SIZE		(1024*8)
+</span><span class="cp"></span>
+<span class="cm">/* The buffer used to store character for this module */</span>
+<span class="k">static</span> <span class="kt">char</span> <span class="n">procfs_buffer</span><span class="p">[</span><span class="n">PROCFS_MAX_SIZE</span><span class="p">];</span>
+<span class="cm">/* The size of the buffer */</span>
+<span class="k">static</span> <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">procfs_buffer_size</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+<span class="k">static</span> <span class="n">ssize_t</span> <span class="nf">procfile_read</span><span class="p">(</span><span class="k">struct</span> <span class="n">file</span> <span class="o">*</span><span class="n">file</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="n">__user</span> <span class="o">*</span><span class="n">buff</span><span class="p">,</span>
+                             <span class="n">size_t</span> <span class="n">len</span><span class="p">,</span> <span class="n">loff_t</span> <span class="o">*</span><span class="n">off</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="n">size_t</span> <span class="n">count</span> <span class="o">=</span> <span class="n">len</span><span class="p">,</span> <span class="n">data_length</span> <span class="o">=</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">procfs_buffer</span><span class="p">);</span>
+    <span class="n">ssize_t</span> <span class="n">retval</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="o">*</span><span class="n">off</span> <span class="o">&gt;=</span> <span class="n">data_length</span><span class="p">)</span>
+        <span class="k">goto</span> <span class="n">out</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">*</span><span class="n">off</span> <span class="o">+</span> <span class="n">len</span> <span class="o">&gt;</span> <span class="n">data_length</span><span class="p">)</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="n">data_length</span> <span class="o">-</span> <span class="o">*</span><span class="n">off</span><span class="p">;</span>
+
+    <span class="cm">/* ret contains the amount of chars wasn&#39;t successfully written to `buf` */</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">copy_to_user</span><span class="p">(</span><span class="n">buff</span><span class="p">,</span> <span class="n">procfs_buffer</span> <span class="o">+</span> <span class="o">*</span><span class="n">off</span><span class="p">,</span> <span class="n">count</span><span class="p">);</span>
+    <span class="o">*</span><span class="n">off</span> <span class="o">+=</span> <span class="n">count</span> <span class="o">-</span> <span class="n">ret</span><span class="p">;</span>
+    <span class="n">retval</span> <span class="o">=</span> <span class="n">count</span> <span class="o">-</span> <span class="n">ret</span><span class="p">;</span>
+
+<span class="nl">out</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">retval</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="cm">/*
+</span><span class="cm">cat /dev/zero | tr &#34;\0&#34; &#34;a&#34; | dd of=/tmp/1.txt bs=1023 count=1
+</span><span class="cm">cat /tmp/1.txt &gt; /proc/pbuf
+</span><span class="cm">*/</span>
+<span class="k">static</span> <span class="n">ssize_t</span> <span class="nf">procfile_write</span><span class="p">(</span><span class="k">struct</span> <span class="n">file</span> <span class="o">*</span><span class="n">file</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="n">__user</span> <span class="o">*</span><span class="n">buff</span><span class="p">,</span>
+                              <span class="n">size_t</span> <span class="n">len</span><span class="p">,</span> <span class="n">loff_t</span> <span class="o">*</span><span class="n">off</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">write_size</span> <span class="o">=</span> <span class="n">len</span><span class="p">;</span>
+	<span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">left_size</span> <span class="o">=</span> <span class="n">PROCFS_MAX_SIZE</span> <span class="o">-</span> <span class="n">procfs_buffer_size</span><span class="p">;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">write_size</span> <span class="o">&gt;</span> <span class="n">left_size</span><span class="p">)</span>
+        <span class="n">write_size</span> <span class="o">=</span> <span class="n">left_size</span><span class="p">;</span>
+
+	<span class="k">if</span> <span class="p">(</span><span class="n">copy_from_user</span><span class="p">(</span><span class="n">procfs_buffer</span> <span class="o">+</span> <span class="n">procfs_buffer_size</span><span class="p">,</span> <span class="n">buff</span><span class="p">,</span> <span class="n">write_size</span><span class="p">))</span> <span class="p">{</span>
+		<span class="n">pr_info</span><span class="p">(</span><span class="s">&#34;copy_from_user failed</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+        <span class="k">return</span> <span class="o">-</span><span class="n">EFAULT</span><span class="p">;</span>
+	<span class="p">}</span>
+
+	<span class="n">pr_info</span><span class="p">(</span><span class="s">&#34;procfile write offset %lu with length %lu</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">procfs_buffer_size</span><span class="p">,</span> <span class="n">write_size</span><span class="p">);</span>
+	<span class="n">procfs_buffer_size</span> <span class="o">+=</span> <span class="n">write_size</span><span class="p">;</span>
+	<span class="o">*</span><span class="n">off</span> <span class="o">+=</span> <span class="n">write_size</span><span class="p">;</span>
+
+    <span class="k">return</span> <span class="n">write_size</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="proc-专用接口">proc 专用接口</h2>
+<p>如果是使用的是 3.10 以后的内核版本，那么请出门右转，因为下面的内容对你帮助不大。新的内核已经不支持这种使用方式。但是如果你使用的还是旧版的 kernel，那么请仔细的往下看。因为在网络上搜一下就会发现，很少有文档会去详细解释这个接口怎么使用。或者解释了也是云里雾里，很难看懂。</p>
+<p>在看我写的文字之前，建议先学习一下 kernel 自带的文档和例程，毕竟这才是最权威的</p>
+<ul>
+<li><a href="http://www.cs.albany.edu/~sdc/CSI500/linux-2.6.31.14/Documentation/DocBook/procfs-guide/index.html" target="_blank" rel="noopener noreffer">Linux Kernel Procfs Guide</a></li>
+<li><a href="https://github.com/torvalds/linux/blob/v2.6.31/Documentation/DocBook/procfs_example.c" target="_blank" rel="noopener noreffer">procfs_example.c</a></li>
+</ul>
+<p>然后如果还不明白，可以参考我下面的补充说明。</p>
+<h3 id="实例说明">实例说明</h3>
+<p>还是老规矩，先举例子，如果你只是想用一下，不想知道太多（很忙），那么照例子写就完了。由于 proc 的专用接口提供了几种写法，所以需要分情况来举例。（就很烦）</p>
+<p>由于 write 回调函数相对比较清楚，我只对 read 函数进行分析。</p>
+<h4 id="传输数据量小于等于一个-page-size">传输数据量小于等于一个 PAGE_SIZE</h4>
+<p>在早期的 linux kernel 中，有大量的使用 proc 专用接口来读写 proc 虚拟文件的例子。主要有以下的两种</p>
+<ul>
+<li>写法 A</li>
+</ul>
+<!--listend-->
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="k">static</span> <span class="kt">int</span> <span class="nf">ap_debug_proc_read</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">page</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">start</span><span class="p">,</span> <span class="n">off_t</span> <span class="n">off</span><span class="p">,</span>
+                              <span class="kt">int</span> <span class="n">count</span><span class="p">,</span> <span class="kt">int</span> <span class="o">*</span><span class="n">eof</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">data</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">char</span> <span class="o">*</span><span class="n">p</span> <span class="o">=</span> <span class="n">page</span><span class="p">;</span>
+    <span class="k">struct</span> <span class="n">ap_data</span> <span class="o">*</span><span class="n">ap</span> <span class="o">=</span> <span class="p">(</span><span class="k">struct</span> <span class="n">ap_data</span> <span class="o">*</span><span class="p">)</span> <span class="n">data</span><span class="p">;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">off</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+        <span class="o">*</span><span class="n">eof</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="n">p</span> <span class="o">+=</span> <span class="n">sprintf</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="s">&#34;BridgedUnicastFrames=%u</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">ap</span><span class="o">-&gt;</span><span class="n">bridged_unicast</span><span class="p">);</span>
+    <span class="n">p</span> <span class="o">+=</span> <span class="n">sprintf</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="s">&#34;BridgedMulticastFrames=%u</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">ap</span><span class="o">-&gt;</span><span class="n">bridged_multicast</span><span class="p">);</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">p</span> <span class="o">-</span> <span class="n">page</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>写法 B</li>
+</ul>
+<!--listend-->
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="k">static</span> <span class="kt">int</span> <span class="nf">ap_debug_proc_read</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">page</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">start</span><span class="p">,</span> <span class="n">off_t</span> <span class="n">off</span><span class="p">,</span>
+                              <span class="kt">int</span> <span class="n">count</span><span class="p">,</span> <span class="kt">int</span> <span class="o">*</span><span class="n">eof</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">data</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">char</span> <span class="o">*</span><span class="n">p</span> <span class="o">=</span> <span class="n">page</span><span class="p">;</span>
+    <span class="k">struct</span> <span class="n">ap_data</span> <span class="o">*</span><span class="n">ap</span> <span class="o">=</span> <span class="p">(</span><span class="k">struct</span> <span class="n">ap_data</span> <span class="o">*</span><span class="p">)</span> <span class="n">data</span><span class="p">;</span>
+
+    <span class="n">p</span> <span class="o">+=</span> <span class="n">sprintf</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="s">&#34;BridgedUnicastFrames=%u</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">ap</span><span class="o">-&gt;</span><span class="n">bridged_unicast</span><span class="p">);</span>
+    <span class="n">p</span> <span class="o">+=</span> <span class="n">sprintf</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="s">&#34;BridgedMulticastFrames=%u</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">ap</span><span class="o">-&gt;</span><span class="n">bridged_multicast</span><span class="p">);</span>
+
+	<span class="o">*</span><span class="n">eof</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">p</span> <span class="o">-</span> <span class="n">page</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>如果查看调用这个回调函数的函数 <code>__proc_file_read</code> （实现在文件 <a href="https://github.com/torvalds/linux/blob/v3.9/fs/proc/generic.c" target="_blank" rel="noopener noreffer">fs/proc/generic.c</a>
+中）就可以发现，B 的写法要更好一些，A 则会多循环一次。</p>
+<p>这种写法其实也就是在函数 <code>__proc_file_read</code> 注释中提到的 3 种做法中的第一种。原文摘录如下:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">Leave *start <span class="o">=</span> NULL.  <span class="o">(</span>This is the default.<span class="o">)</span> Put the data of the requested
+offset at that offset within the buffer.  Return the number <span class="o">(</span>n<span class="o">)</span> of bytes there
+are from the beginning of the buffer up to the last byte of data.  If the number
+of supplied bytes <span class="o">(=</span> n - offset<span class="o">)</span> is greater than zero and you didn<span class="err">&#39;</span>t signal eof
+and the reader is prepared to take more data you will be called again with the
+requested offset advanced by the number of bytes absorbed.  This interface is
+useful <span class="k">for</span> files no larger than the buffer.
+</code></pre></td></tr></table>
+</div>
+</div><p>还不理解是不是？换种说法</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">1st call:
+- *start <span class="o">=</span> NULL
+<span class="c1"># enter proc_read</span>
+- memcpy<span class="o">(</span>page + offset, internal_data + offset, data_copied_to_page_len<span class="o">)</span>
+- <span class="nv">data_copied_to_user_len</span> <span class="o">=</span> data_copied_to_page_len
+- <span class="k">return</span> <span class="o">(</span>offset + data_copied_to_user_len<span class="o">)</span>
+<span class="c1"># exit proc_read</span>
+- copy data of data_copied_to_user_len from kernel space <span class="o">(</span>page + offset<span class="o">)</span> to user
+  space <span class="o">(</span>buf + offset<span class="o">)</span>
+- <span class="nv">offset</span> <span class="o">+=</span> data_copied_to_user_len
+
+2nd call:
+- *start <span class="o">=</span> NULL
+<span class="c1"># enter proc_read</span>
+- memcpy<span class="o">(</span>page + offset, internal_data + offset, data_copied_to_page_len<span class="o">)</span>
+- <span class="nv">data_copied_to_user_len</span> <span class="o">=</span> data_copied_to_page_len
+- <span class="k">return</span> <span class="o">(</span>offset + data_copied_to_user_len<span class="o">)</span>
+<span class="c1"># exit proc_read</span>
+- copy data of data_copied_to_user_len from kernel space <span class="o">(</span>page + offset<span class="o">)</span> to user
+  space <span class="o">(</span>buf + offset<span class="o">)</span>
+- <span class="nv">offset</span> <span class="o">+=</span> data_copied_to_user_len
+</code></pre></td></tr></table>
+</div>
+</div><p>在这种情况下，start 不被使用。需要关注的只有 offset 和 eof 。</p>
+<p>从前面的函数调用可以看出，虽然一般用 eof 来判断是否读取结束，但是即使没有设置
+eof 也能结束读取循环。只要把数据读取结束即可。只是这样容易出错且效率低，所以显式的指定 eof 是个更好的编程习惯。</p>
+<p>如果对于 offset 和 eof 的理解还是不够清楚，可以参考 stackoverflow 上的一段举例，我觉得还是挺清楚的。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">off is the position in the file from where data has to be <span class="nb">read</span> from. This is
+like off <span class="nb">set</span> of normal file. But, in the <span class="k">case</span> of proc_read it is some what
+different. For example <span class="k">if</span> you invoke a <span class="nb">read</span> call on the proc file to <span class="nb">read</span> <span class="m">100</span>
+bytes of data, off and count in the proc_read will be like this:
+
+in the first time, <span class="nv">off</span> <span class="o">=</span> 0, count 100. Say <span class="k">for</span> example in your proc_read you
+have returned only <span class="m">10</span> bytes. Then the control cannot come back to the user
+application, your proc_read will be called by the kernel once again with off as
+<span class="m">10</span> and count as 90. Again <span class="k">if</span> you <span class="k">return</span> <span class="m">20</span> in the proc_read, you will again
+called with off 30, count 70. Like this you will be called till count reaches
+0. Then the data is written into the given user buffer and your application
+read<span class="o">()</span> call returns.
+
+But <span class="k">if</span> you don<span class="err">&#39;</span>t have hundred bytes of data and want to <span class="k">return</span> only a few bytes,
+you must <span class="nb">set</span> the eof to 1. Then the read<span class="o">()</span> <span class="k">function</span> returns immediately.
+</code></pre></td></tr></table>
+</div>
+</div><h4 id="传输数据量大于一个-page-size">传输数据量大于一个 PAGE_SIZE</h4>
+<p>还是先看例子</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="cp">#define BUFSIZ 8192
+</span><span class="cp"></span><span class="k">static</span> <span class="kt">char</span> <span class="n">output_data</span><span class="p">[</span><span class="n">BUFSIZ</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+
+<span class="k">static</span> <span class="kt">int</span> <span class="nf">read_method2</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">page</span><span class="p">,</span>
+						<span class="kt">char</span> <span class="o">**</span><span class="n">start</span><span class="p">,</span>
+						<span class="n">off_t</span> <span class="n">offset</span><span class="p">,</span>
+						<span class="kt">int</span> <span class="n">count</span><span class="p">,</span>
+						<span class="kt">int</span> <span class="o">*</span><span class="n">eof</span><span class="p">,</span>
+						<span class="kt">void</span> <span class="o">*</span><span class="n">data</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">int</span> <span class="n">len</span> <span class="o">=</span> <span class="n">strlen</span><span class="p">(</span><span class="n">output_data</span><span class="p">);</span>
+	<span class="kt">int</span> <span class="n">read_size</span> <span class="o">=</span> <span class="n">PAGE_SIZE</span><span class="o">-</span><span class="mi">1</span><span class="p">;</span> <span class="c1">// suppose PAGE_SIZE is 4K
+</span><span class="c1"></span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">offset</span> <span class="o">&gt;=</span> <span class="n">len</span><span class="p">)</span> <span class="p">{</span>
+        <span class="o">*</span><span class="n">eof</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+		<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+	<span class="p">}</span>
+    <span class="n">memcpy</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">output_data</span><span class="o">+</span><span class="n">offset</span><span class="p">,</span> <span class="n">read_size</span><span class="p">);</span>
+	<span class="o">*</span><span class="n">start</span> <span class="o">=</span> <span class="n">read_size</span><span class="p">;</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">read_size</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>所以如果 caller 请求读取的是 8K 字节，那么第一次调用 read_proc 的时候 offset 0，
+count 8192；第二次 <code>offset = offset + (*start)</code> ，即 4095 (4K-1)，count 4097；第三次 offset 8190，count 2 &hellip;</p>
+<p>这里使用的是 3 种方式中的第二种做法。原文如下</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">1<span class="o">)</span> Set *start <span class="o">=</span> an unsigned long value less than the buffer address but greater
+than zero. Put the data of the requested offset at the beginning of the buffer.
+Return the number of bytes of data placed there.  If this number is greater than
+zero and you didn<span class="err">&#39;</span>t signal eof and the reader is prepared to take more data you
+will be called again with the requested offset advanced by *start. This
+interface is useful when you have a large file consisting of a series of blocks
+which you want to count and <span class="k">return</span> as wholes.
+</code></pre></td></tr></table>
+</div>
+</div><p>这个比较难理解一些。因为首先 <code>*start</code> 需要设置成一个 unsigned long 的值，并且要大于 0 小于 page 的地址（比如 0x80002000）。在这种情况下，offset 会根据 <code>*start</code>
+的值进行递增。</p>
+<p>首先需要注意第一次调用 read_proc 的时候 <code>*start</code> 必定是 NULL。这是函数
+<code>__proc_file_read</code> 里面写死的。具体一些，上面这段注释可以按以下逻辑理解：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">1st call:
+- *start <span class="o">=</span> NULL
+<span class="c1"># enter proc_read</span>
+- memcpy<span class="o">(</span>page, internal_data + offset, data_copied_to_page_len<span class="o">)</span>
+- *start <span class="o">=</span> N <span class="o">(</span><span class="m">0</span> &lt; *start &lt; page<span class="o">)</span>
+- <span class="nv">data_copied_to_user_len</span> <span class="o">=</span> data_copied_to_page_len
+- <span class="k">return</span> data_copied_to_user_len
+<span class="c1"># exit proc_read</span>
+- copy data of data_copied_to_user_len from kernel space<span class="o">(</span>page<span class="o">)</span> to user space
+- <span class="nv">offset</span> <span class="o">+=</span> *start
+
+2nd call:
+- *start &gt;<span class="o">=</span> page
+<span class="c1"># enter proc_read</span>
+- memcpy<span class="o">(</span>page, internal_data + offset, data_copied_to_page_len<span class="o">)</span>
+- *start <span class="o">=</span> N <span class="o">(</span><span class="m">0</span> &lt; *start &lt; page<span class="o">)</span>
+- <span class="nv">data_copied_to_user_len</span> <span class="o">=</span> data_copied_to_page_len
+- <span class="k">return</span> data_copied_to_user_len
+<span class="c1"># exit proc_read</span>
+- copy data of data_copied_to_user_len from kernel space<span class="o">(</span>page<span class="o">)</span> to user space
+- <span class="nv">offset</span> <span class="o">+=</span> *start
+</code></pre></td></tr></table>
+</div>
+</div><p>这里其实有个隐藏的条件。由于每次 offset 是根据 <code>*start</code> 递增，而用户空间的 buf 却是根据返回值（n）递增，所以 n 应该和 <code>*start</code> 相等。又 buf 是从 page 中的数据拷贝而来，所以拷贝的数据长度（data_copied_to_user_len，data_copied_to_page_len）应该和 *start 相等才合理。</p>
+<p>这里有个问题需要注意。由于每次都是按照 <code>*start</code> 的长度来拷贝 page 中的内容到
+user space 去的，那么如果最后一次 read_proc 被调用的时候 <code>*start</code> 被设置成了一个超出剩余长度的值，那么就会从 page 中拷贝多余的信息到用户空间。另外，由于
+<code>__proc_file_read</code> 中的控制循环的变量 nbytes 是一个无符号型的数，所以永远不会 <code>&lt; 0</code> ，只有在 <code>= 0</code> 的时候才可能退出。因此在这种情况下，如果没有用 *eof 显式的指定结束而退出，那么有可能就进入一个死循环了。所以 <code>*start</code> 的值应该根据当前剩余数据的长度进行调整。</p>
+<p>这种方式和第一种最大的区别在于返回值。当 <code>start == NULL</code> 的时候返回值应该是 page
+中所有数据的长度（offset + 拷贝的长度），而当 <code>start &gt; 0 &amp;&amp; start &lt; (unsigned long)page</code> 的时候，返回值只是拷贝的数据长度。</p>
+<p>另外一种方式就是函数 <code>__proc_file_read</code> 注释中提到的最后一种了。这种方式也可以处理数据量大于一个 PAGE_SIZE 的情形。</p>
+<p>示例代码如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="k">static</span> <span class="kt">int</span> <span class="nf">hp_sdc_rtc_read_proc</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">page</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">start</span><span class="p">,</span> <span class="n">off_t</span> <span class="n">off</span><span class="p">,</span>
+								<span class="kt">int</span> <span class="n">count</span><span class="p">,</span> <span class="kt">int</span> <span class="o">*</span><span class="n">eof</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">data</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">int</span> <span class="n">len</span> <span class="o">=</span> <span class="n">hp_sdc_rtc_proc_output</span> <span class="p">(</span><span class="n">page</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">len</span> <span class="o">&lt;=</span> <span class="n">off</span><span class="o">+</span><span class="n">count</span><span class="p">)</span> <span class="o">*</span><span class="n">eof</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="o">*</span><span class="n">start</span> <span class="o">=</span> <span class="n">page</span> <span class="o">+</span> <span class="n">off</span><span class="p">;</span>
+    <span class="n">len</span> <span class="o">-=</span> <span class="n">off</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">len</span><span class="o">&gt;</span><span class="n">count</span><span class="p">)</span> <span class="n">len</span> <span class="o">=</span> <span class="n">count</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">len</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">)</span> <span class="n">len</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="k">return</span> <span class="n">len</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>原文摘录如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">2<span class="o">)</span> Set *start <span class="o">=</span> an address within the buffer. Put the data of the requested
+offset at *start. Return the number of bytes of data placed there. If this
+number is greater than zero and you didn<span class="err">&#39;</span>t signal eof and the reader is prepared
+to take more data you will be called again with the requested offset advanced by
+the number of bytes absorbed.
+</code></pre></td></tr></table>
+</div>
+</div><p>首先需要注意第一次调用 read_proc 的时候 start 必定是 NULL。这是函数~__proc_file_read~ 里面写死的。所以上面这段注释所对应的行为必然是从第二次进入才会发生。我们可以这么理解</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">1st call:
+- *start <span class="o">=</span> NULL
+<span class="c1"># enter proc_read</span>
+- memcpy<span class="o">(</span>page, internal_data, data_copied_to_page_len<span class="o">)</span>
+- *start <span class="o">=</span> page + offset <span class="o">(</span>*start &gt;<span class="o">=</span> page<span class="o">)</span>
+- <span class="nv">data_copied_to_user_len</span> <span class="o">=</span> data_copied_to_page_len - offset
+- <span class="k">return</span> data_copied_to_user_len
+<span class="c1"># exit proc_read</span>
+- copy data of data_copied_to_user_len from kernel space<span class="o">(</span>*start<span class="o">)</span> to user space
+- <span class="nv">offset</span> <span class="o">+=</span> data_copied_to_user_len
+<span class="c1"># 注意read_proc 调用者的目的是从文件的offset处读取，所以当把数据放在page中时，需</span>
+<span class="c1"># 要再加上offset赋值给 *start</span>
+
+2nd call:
+- *start &gt;<span class="o">=</span> page
+<span class="c1"># enter proc_read</span>
+- memcpy<span class="o">(</span>page, internal_data, data_copied_to_page_len<span class="o">)</span>
+- *start <span class="o">=</span> page + offset <span class="o">(</span>*start &gt;<span class="o">=</span> page<span class="o">)</span>
+- <span class="nv">data_copied_to_user_len</span> <span class="o">=</span> data_copied_to_page_len - offset
+- <span class="k">return</span> data_copied_to_user_len
+<span class="c1"># exit proc_read</span>
+- copy data of data_copied_to_user_len from kernel space<span class="o">(</span>*start<span class="o">)</span> to user space
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="参考">参考</h2>
+<ul>
+<li><a href="https://sysprog21.github.io/lkmpg/" target="_blank" rel="noopener noreffer">The Linux Kernel Module Programming Guide</a></li>
+<li><a href="https://developer.ibm.com/articles/l-proc/" target="_blank" rel="noopener noreffer">Access the Linux kernel using the /proc filesystem</a></li>
+<li><a href="http://www.cs.albany.edu/~sdc/CSI500/linux-2.6.31.14/Documentation/DocBook/procfs-guide/index.html" target="_blank" rel="noopener noreffer">Linux Kernel Procfs Guide</a></li>
+<li><a href="https://unix.stackexchange.com/questions/4884/what-is-the-difference-between-procfs-and-sysfs" target="_blank" rel="noopener noreffer">What is the difference between procfs and sysfs?</a></li>
+</ul>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>更新于 2022-08-01</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"><span>
+                            <a class="link-to-markdown" href="/linux_proc/index.md" target="_blank">阅读原始文档</a>
+                        </span></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://f0ghua.github.io/linux_proc/" data-title="内核空间和用户文件通信 - proc 虚拟文件系统"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://f0ghua.github.io/linux_proc/"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Hacker News" data-sharer="hackernews" data-url="https://f0ghua.github.io/linux_proc/" data-title="内核空间和用户文件通信 - proc 虚拟文件系统"><i class="fab fa-hacker-news fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://f0ghua.github.io/linux_proc/" data-title="内核空间和用户文件通信 - proc 虚拟文件系统"><i data-svg-src="https://cdn.jsdelivr.net/npm/simple-icons@2.14.0/icons/line.svg"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://f0ghua.github.io/linux_proc/" data-title="内核空间和用户文件通信 - proc 虚拟文件系统"><i class="fab fa-weibo fa-fw"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/security/" class="prev" rel="prev" title="信息安全技术入门"><i class="fas fa-angle-left fa-fw"></i>信息安全技术入门</a></div>
+</div>
+<div id="comments"><div id="utterances"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://utteranc.es/">Utterances</a>.
+            </noscript></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2022</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">fog</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-arrow-up fa-fw"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="查看评论">
+                <i class="fas fa-comment fa-fw"></i>
+            </a>
+        </div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/css/lightgallery.min.css"><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/smooth-scroll@16.1.3/dist/smooth-scroll.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/autocomplete.js@0.37.1/dist/autocomplete.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/algoliasearch@4.2.0/dist/algoliasearch-lite.umd.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lazysizes@5.2.2/lazysizes.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/js/lightgallery.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lg-thumbnail.js@1.2.0/dist/lg-thumbnail.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lg-zoom.js@1.2.0/dist/lg-zoom.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sharer.js@0.4.0/sharer.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":10},"comment":{"utterances":{"darkTheme":"github-dark","issueTerm":"pathname","label":"","lightTheme":"github-light","repo":"f0ghua/hugo_comments"}},"lightGallery":{"actualSize":false,"exThumbImage":"data-thumbnail","hideBarsDelay":2000,"selector":".lightgallery","speed":400,"thumbContHeight":80,"thumbWidth":80,"thumbnail":true},"search":{"algoliaAppID":"I9I6IQKZY4","algoliaIndex":"index.cn","algoliaSearchKey":"604ef86245b2a95cadc730cb1dde0244","highlightTag":"em","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50,"type":"algolia"}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>
