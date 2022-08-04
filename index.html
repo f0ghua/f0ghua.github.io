@@ -99,9 +99,14 @@
 <main class="main">
                 <div class="container"><div class="page home" posts><div class="home-profile"><h2 class="home-subtitle">分享是一种快乐</h2><div class="links"><a href="https://github.com/f0ghua" title="GitHub" target="_blank" rel="noopener noreffer me"><i class="fab fa-github-alt fa-fw"></i></a><a href="mailto:fog_hua@126.com" title="Email" rel=" me"><i class="far fa-envelope fa-fw"></i></a><a href="/index.xml" title="RSS" target="_blank" rel="noopener noreffer me"><i class="fas fa-rss fa-fw"></i></a></div></div>
 <article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
+        <a href="/openwrt-luci/">openwrt luci工作原理浅析</a>
+    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>fog</a></span>&nbsp;<span class="post-publish">发布于 <time datetime="2022-08-04">2022-08-04</time></span></div><div class="content">luci 的工作原理 首先说明，这里分析的版本为 openwrt-21.02.3 luci 可以理解为 lua + uci 。是用 lua 实现的读写 uci 配置的一个框架。这个框架配合 uhttpd 可以实现简单快速的页面开发和访问</div><div class="post-footer">
+        <a href="/openwrt-luci/">阅读全文</a></div>
+</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
         <a href="/linux_proc/">内核空间和用户空间通信 - proc 虚拟文件系统</a>
     </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>fog</a></span>&nbsp;<span class="post-publish">发布于 <time datetime="2022-08-01">2022-08-01</time></span></div><div class="content">概述 使用 proc 虚拟文件系统来在内核空间和用户空间交换数据应该是最常用的一种方式了。我们可以在 /proc 目录下创建一个虚拟的文件，通过读写这个文件实现用户</div><div class="post-footer">
-        <a href="/linux_proc/">阅读全文</a></div>
+        <a href="/linux_proc/">阅读全文</a><div class="post-tags">
+                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/kernel/">kernel</a></div></div>
 </article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
         <a href="/security/">信息安全技术入门</a>
     </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>fog</a></span>&nbsp;<span class="post-publish">发布于 <time datetime="2022-07-01">2022-07-01</time></span></div><div class="content">谈到信息安全，我只能算是个门外汉。但是由于工作需求，经常也会接触一些，所以整理一下备查。顺便也把自己的一些心得分享出来。 关键字 我们在看跟安全</div><div class="post-footer">
@@ -120,11 +125,6 @@
         <a href="/sprintf/">C 语言常用库函数-sprintf</a>
     </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>fog</a></span>&nbsp;<span class="post-publish">发布于 <time datetime="2022-02-07">2022-02-07</time></span>&nbsp;<span class="post-category">收录于 <a href="/categories/programming/"><i class="far fa-folder fa-fw"></i>programming</a></span></div><div class="content">函数原型 1 2 3 4 5 6 7 8 #include &lt;stdio.h&gt; /* 函数说明: 按照format指定的格式填充字符串str，以 &#39;\0&#39; 结尾。 函数返回值: 若成功则返回存入数组的字符数，若编</div><div class="post-footer">
         <a href="/sprintf/">阅读全文</a><div class="post-tags">
-                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/c/">c</a></div></div>
-</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
-        <a href="/strcpy/">C 语言常用库函数-strcpy</a>
-    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>fog</a></span>&nbsp;<span class="post-publish">发布于 <time datetime="2022-02-07">2022-02-07</time></span>&nbsp;<span class="post-category">收录于 <a href="/categories/programming/"><i class="far fa-folder fa-fw"></i>programming</a></span></div><div class="content">函数原型 1 2 3 #include &lt;string.h&gt; char *strcpy(char *dest, const char *src); 用法分析 strcpy 属于无边界检查的一类函数，因此使用起来十分的危险，在标准文档中已经不建议使用。 无边界检查很容易就会发</div><div class="post-footer">
-        <a href="/strcpy/">阅读全文</a><div class="post-tags">
                 <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/c/">c</a></div></div>
 </article><ul class="pagination"><li class="page-item active">
                     <span class="page-link">

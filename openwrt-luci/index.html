@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+        <title>openwrt luci工作原理浅析 - Fog&#39;s Blog</title><meta name="Description" content="Technology sharing"><meta property="og:title" content="openwrt luci工作原理浅析" />
+<meta property="og:description" content="luci 的工作原理 首先说明，这里分析的版本为 openwrt-21.02.3 luci 可以理解为 lua &#43; uci 。是用 lua 实现的读写 uci 配置的一个框架。这个框架配合 uhttpd 可以实现简单快速的页面开发和访问" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://f0ghua.github.io/openwrt-luci/" /><meta property="og:image" content="https://f0ghua.github.io/logo.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2022-08-04T17:51:00+08:00" />
+<meta property="article:modified_time" content="2022-08-04T18:00:51+08:00" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://f0ghua.github.io/logo.png"/>
+
+<meta name="twitter:title" content="openwrt luci工作原理浅析"/>
+<meta name="twitter:description" content="luci 的工作原理 首先说明，这里分析的版本为 openwrt-21.02.3 luci 可以理解为 lua &#43; uci 。是用 lua 实现的读写 uci 配置的一个框架。这个框架配合 uhttpd 可以实现简单快速的页面开发和访问"/>
+<meta name="application-name" content="Fog&#39;s Blog">
+<meta name="apple-mobile-web-app-title" content="Fog&#39;s Blog"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="https://f0ghua.github.io/openwrt-luci/" /><link rel="prev" href="https://f0ghua.github.io/linux_proc/" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.7.2/animate.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "openwrt luci工作原理浅析",
+        "inLanguage": "zh-CN",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https:\/\/f0ghua.github.io\/openwrt-luci\/"
+        },"image": ["https:\/\/f0ghua.github.io\/images\/Apple-Devices-Preview.png"],"genre": "posts","wordcount":  3591 ,
+        "url": "https:\/\/f0ghua.github.io\/openwrt-luci\/","datePublished": "2022-08-04T17:51:00+08:00","dateModified": "2022-08-04T18:00:51+08:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
+            "@type": "Organization",
+            "name": "xxxx","logo": "https:\/\/f0ghua.github.io\/images\/avatar.png"},"author": {
+                "@type": "Person",
+                "name": "fog"
+            },"description": ""
+    }
+    </script></head>
+    <body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('auto' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'auto' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Fog&#39;s Blog"><span class="header-title-pre"><i class='far fa-kiss-wink-heart fa-fw'></i></span>Fog&#39;s Blog</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> 所有文章 </a><a class="menu-item" href="/tags/"> 标签 </a><a class="menu-item" href="/categories/"> 分类 </a><a class="menu-item" href="/categories/documentation/"> 文档 </a><a class="menu-item" href="/about/"> 关于 </a><a class="menu-item" href="https://github.com/dillonzq/LoveIt" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i>  </a><span class="menu-item delimiter"></span><a href="javascript:void(0);" class="menu-item language" title="选择语言">简体中文<i class="fas fa-chevron-right fa-fw"></i>
+                        <select class="language-select" id="language-select-desktop" onchange="location = this.value;"><option value="/openwrt-luci/" selected>简体中文</option></select>
+                    </a><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Fog&#39;s Blog"><span class="header-title-pre"><i class='far fa-kiss-wink-heart fa-fw'></i></span>Fog&#39;s Blog</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="搜索文章标题或内容..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="搜索">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="清空">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        取消
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">所有文章</a><a class="menu-item" href="/tags/" title="">标签</a><a class="menu-item" href="/categories/" title="">分类</a><a class="menu-item" href="/categories/documentation/" title="">文档</a><a class="menu-item" href="/about/" title="">关于</a><a class="menu-item" href="https://github.com/dillonzq/LoveIt" title="GitHub" rel="noopener noreffer" target="_blank"><i class='fab fa-github fa-fw'></i></a><a href="javascript:void(0);" class="menu-item theme-switch" title="切换主题">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a><a href="javascript:void(0);" class="menu-item" title="选择语言">简体中文<i class="fas fa-chevron-right fa-fw"></i>
+                    <select class="language-select" onchange="location = this.value;"><option value="/openwrt-luci/" selected>简体中文</option></select>
+                </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">目录</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animated flipInX">openwrt luci工作原理浅析</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>fog</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-08-04">2022-08-04</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 3591 字&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 8 分钟&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>目录</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#luci-的工作原理">luci 的工作原理</a>
+      <ul>
+        <li><a href="#action-dot-type-view">action.type == view</a>
+          <ul>
+            <li><a href="#显示菜单">显示菜单</a></li>
+          </ul>
+        </li>
+        <li><a href="#action-dot-type-firstchild">action.type == firstchild</a></li>
+      </ul>
+    </li>
+    <li><a href="#faq">FAQ</a>
+      <ul>
+        <li><a href="#什么是-cbi">什么是 CBI</a></li>
+        <li><a href="#为什么-luci-提供了-2-套-api">为什么 luci 提供了 2 套 API?</a></li>
+        <li><a href="#有哪些相关的目录">有哪些相关的目录？</a></li>
+        <li><a href="#luci-的-theme-是怎么应用的">luci 的 theme 是怎么应用的？</a></li>
+        <li><a href="#修改后如何更新">修改后如何更新？</a></li>
+      </ul>
+    </li>
+    <li><a href="#调试">调试</a></li>
+    <li><a href="#参考">参考</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><h2 id="luci-的工作原理">luci 的工作原理</h2>
+<p>首先说明，这里分析的版本为 openwrt-21.02.3</p>
+<p>luci 可以理解为 lua + uci 。是用 lua 实现的读写 uci 配置的一个框架。这个框架配合
+uhttpd 可以实现简单快速的页面开发和访问配置。</p>
+<p>在 openwrt 中，默认 uhttpd 的启动参数如下</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">/usr/sbin/uhttpd -f -h /www -r OpenWrt -x /cgi-bin -u /ubus -t <span class="m">60</span> -T <span class="m">30</span> -k <span class="m">20</span> -A <span class="m">1</span> -n <span class="m">3</span> -N <span class="m">100</span> -R -p 0.0.0.0:80 -p <span class="o">[</span>::<span class="o">]</span>:80
+</code></pre></td></tr></table>
+</div>
+</div><p>以访问主页面为例。访问的页面为 <a href="http://192.168.1.1/" target="_blank" rel="noopener noreffer">http://192.168.1.1/</a> ，此时访问的是 uhttpd 提供的 80
+端口开放的服务。</p>
+<p>查看 uhttpd 的配置文件 <code>/etc/config/uhttpd</code> 可以知道</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">root@OpenWrt:/# cat /etc/config/uhttpd
+
+config uhttpd <span class="s1">&#39;main&#39;</span>
+        list listen_http <span class="s1">&#39;0.0.0.0:80&#39;</span>
+        list listen_http <span class="s1">&#39;[::]:80&#39;</span>
+        list listen_https <span class="s1">&#39;0.0.0.0:443&#39;</span>
+        list listen_https <span class="s1">&#39;[::]:443&#39;</span>
+        option redirect_https <span class="s1">&#39;0&#39;</span>
+        option home <span class="s1">&#39;/www&#39;</span>
+        option rfc1918_filter <span class="s1">&#39;1&#39;</span>
+        option max_requests <span class="s1">&#39;3&#39;</span>
+        option max_connections <span class="s1">&#39;100&#39;</span>
+        option cert <span class="s1">&#39;/etc/uhttpd.crt&#39;</span>
+        option key <span class="s1">&#39;/etc/uhttpd.key&#39;</span>
+        option cgi_prefix <span class="s1">&#39;/cgi-bin&#39;</span>
+        list lua_prefix <span class="s1">&#39;/cgi-bin/luci=/usr/lib/lua/luci/sgi/uhttpd.lua&#39;</span>
+        option script_timeout <span class="s1">&#39;60&#39;</span>
+        option network_timeout <span class="s1">&#39;30&#39;</span>
+        option http_keepalive <span class="s1">&#39;20&#39;</span>
+        option tcp_keepalive <span class="s1">&#39;1&#39;</span>
+        option ubus_prefix <span class="s1">&#39;/ubus&#39;</span>
+
+config cert <span class="s1">&#39;defaults&#39;</span>
+        option days <span class="s1">&#39;730&#39;</span>
+        option key_type <span class="s1">&#39;ec&#39;</span>
+        option bits <span class="s1">&#39;2048&#39;</span>
+        option ec_curve <span class="s1">&#39;P-256&#39;</span>
+        option country <span class="s1">&#39;ZZ&#39;</span>
+        option state <span class="s1">&#39;Somewhere&#39;</span>
+        option location <span class="s1">&#39;Unknown&#39;</span>
+        option commonname <span class="s1">&#39;OpenWrt&#39;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>默认读取的应该是 <code>/www</code> （home 目录）下的 index.html 文件。该文件包含以下语句</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="p">&lt;</span><span class="nt">meta</span> <span class="na">http-equiv</span><span class="o">=</span><span class="s">&#34;refresh&#34;</span> <span class="na">content</span><span class="o">=</span><span class="s">&#34;0; URL=cgi-bin/luci/&#34;</span> <span class="p">/&gt;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>所以会被自动导向 <code>/cgi-bin/luci/</code> 。而从 <code>/etc/config/uhttpd</code> 文件中的 <code>list lua_prefix</code> 设置可以知道当解析到 url 字串为 <code>/cgi-bin/luci</code> 的时候会转给 lua 脚本 <code>/usr/lib/lua/luci/sgi/uhttpd.lua</code> 来处理。</p>
+<p>看看里面的主要内容</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">require <span class="s2">&#34;luci.dispatcher&#34;</span>
+
+<span class="nb">local</span> <span class="nv">x</span> <span class="o">=</span> coroutine.create<span class="o">(</span>luci.dispatcher.httpdispatch<span class="o">)</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>可以看到在获得 http 的 request 之后又转给 <code>dispatcher.lua</code> 里面的 httpdispatch
+函数处理去了，而函数 httpdispatch 里面的主要工作靠函数 dispatch 来完成。</p>
+<p>因此最终调用的是 <code>/usr/lib/lua/luci/dispatcher.lua</code> 里的函数 dispatch，这个才是真实做事的地方。简单分析一下主要的代码</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-lua" data-lang="lua"><span class="kr">function</span> <span class="nf">dispatch</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+	<span class="kd">local</span> <span class="n">menu</span> <span class="o">=</span> <span class="n">menu_json</span><span class="p">()</span>
+	<span class="kd">local</span> <span class="n">page</span> <span class="o">=</span> <span class="n">menu</span>
+	<span class="c1">-- 分析 /usr/share/luci/menu.d/*.json 文件，获得页面的节点树</span>
+
+	<span class="kr">if</span> <span class="n">action.type</span> <span class="o">==</span> <span class="s2">&#34;view&#34;</span> <span class="kr">then</span>
+	<span class="kr">elseif</span> <span class="n">action.type</span> <span class="o">==</span> <span class="s2">&#34;call&#34;</span> <span class="kr">then</span>
+	<span class="kr">elseif</span> <span class="n">action.type</span> <span class="o">==</span> <span class="s2">&#34;firstchild&#34;</span> <span class="kr">then</span>
+	<span class="c1">-- ...</span>
+    <span class="c1">-- 根据节点里面的action属性做相应的处理</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>由于 action.type 为 view 和 firstchild 的情形比较典型，所以这里只分析这两种的处理过程。理解了这两种，其他的也就很容易看懂了。</p>
+<h3 id="action-dot-type-view">action.type == view</h3>
+<p>先来看看 <code>action.type == view</code> 的情况 。比如访问路径为
+<code>http://192.168.1.111/cgi-bin/luci/admin/system</code> ，在文件
+<code>/usr/share/luci/menu.d/luci-mod-system.json</code> 中定义的路径如下:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json">        <span class="s2">&#34;admin/system/system&#34;</span><span class="err">:</span> <span class="p">{</span>
+                <span class="nt">&#34;title&#34;</span><span class="p">:</span> <span class="s2">&#34;System&#34;</span><span class="p">,</span>
+                <span class="nt">&#34;order&#34;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="nt">&#34;action&#34;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;view&#34;</span><span class="p">,</span>
+                        <span class="nt">&#34;path&#34;</span><span class="p">:</span> <span class="s2">&#34;system/system&#34;</span>
+                <span class="p">},</span>
+                <span class="nt">&#34;depends&#34;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="nt">&#34;acl&#34;</span><span class="p">:</span> <span class="p">[</span> <span class="s2">&#34;luci-mod-system-config&#34;</span> <span class="p">]</span>
+                <span class="p">}</span>
+        <span class="p">}</span><span class="err">,</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>当访问该页面时（ 菜单 System-&gt;System ），lua 脚本的调试输出如下（调试的方法见后面章节）：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">root@OpenWrt:/usr/lib/lua/luci# :&gt;/tmp/luci.output <span class="o">&amp;&amp;</span> tail -f /tmp/luci.output
+<span class="o">[</span>09:48:00<span class="o">]</span>: dispatcher.lua  httpdispatch enter, <span class="nv">pathinfo</span> <span class="o">=</span> /admin/system/system
+<span class="o">[</span>09:48:00<span class="o">]</span>: dispatch enter
+<span class="o">[</span>09:48:00<span class="o">]</span>: init_template_engine enter, <span class="nv">media</span> <span class="o">=</span> /luci-static/bootstrap
+<span class="o">[</span>09:48:00<span class="o">]</span>: Template.__init__ enter, <span class="nv">name</span> <span class="o">=</span> themes/bootstrap/header
+<span class="o">[</span>09:48:00<span class="o">]</span>: <span class="nv">sourcefile</span> <span class="o">=</span>/usr/lib/lua/luci/view/themes/bootstrap/header.htm
+<span class="o">[</span>09:48:00<span class="o">]</span>: Template.__init__ <span class="nb">exit</span>
+<span class="o">[</span>09:48:00<span class="o">]</span>: init_template_engine after Template themes/bootstrap/header
+<span class="o">[</span>09:48:00<span class="o">]</span>: init_template_engine <span class="nb">exit</span>
+<span class="o">[</span>09:48:00<span class="o">]</span>: dispatch <span class="nv">action</span> <span class="o">=</span>
+<span class="o">{</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="s1">&#39;view&#39;</span>
+    <span class="nv">path</span> <span class="o">=</span> <span class="s1">&#39;system/system&#39;</span>
+<span class="o">}</span>
+<span class="o">[</span>09:48:00<span class="o">]</span>: Template.__init__ enter, <span class="nv">name</span> <span class="o">=</span> view
+<span class="o">[</span>09:48:00<span class="o">]</span>: <span class="nv">sourcefile</span> <span class="o">=</span>/usr/lib/lua/luci/view/view.htm
+<span class="o">[</span>09:48:00<span class="o">]</span>: Template.__init__ <span class="nb">exit</span>
+<span class="o">[</span>09:48:00<span class="o">]</span>: Template.render enter, <span class="nv">scope</span> <span class="o">=</span>
+<span class="o">{</span>
+    <span class="nv">view</span> <span class="o">=</span> <span class="s1">&#39;system/system&#39;</span>
+<span class="o">}</span>
+<span class="o">[</span>09:48:00<span class="o">]</span>: Template.__init__ enter, <span class="nv">name</span> <span class="o">=</span> header
+<span class="o">[</span>09:48:00<span class="o">]</span>: <span class="nv">sourcefile</span> <span class="o">=</span>/usr/lib/lua/luci/view/header.htm
+<span class="o">[</span>09:48:00<span class="o">]</span>: Template.__init__ <span class="nb">exit</span>
+<span class="o">[</span>09:48:00<span class="o">]</span>: Template.render enter, <span class="nv">scope</span> <span class="o">=</span>
+<span class="o">{</span>
+<span class="o">}</span>
+<span class="o">[</span>09:48:00<span class="o">]</span>: Template.__init__ enter, <span class="nv">name</span> <span class="o">=</span> themes/bootstrap/header
+<span class="o">[</span>09:48:00<span class="o">]</span>: Template.__init__ <span class="nb">exit</span>
+<span class="o">[</span>09:48:00<span class="o">]</span>: Template.render enter, <span class="nv">scope</span> <span class="o">=</span>
+<span class="o">{</span>
+<span class="o">}</span>
+<span class="o">[</span>09:48:00<span class="o">]</span>: Template.render <span class="nb">exit</span>
+<span class="o">[</span>09:48:00<span class="o">]</span>: Template.render <span class="nb">exit</span>
+<span class="o">[</span>09:48:00<span class="o">]</span>: Template.__init__ enter, <span class="nv">name</span> <span class="o">=</span> footer
+<span class="o">[</span>09:48:00<span class="o">]</span>: <span class="nv">sourcefile</span> <span class="o">=</span>/usr/lib/lua/luci/view/footer.htm
+<span class="o">[</span>09:48:00<span class="o">]</span>: Template.__init__ <span class="nb">exit</span>
+<span class="o">[</span>09:48:00<span class="o">]</span>: Template.render enter, <span class="nv">scope</span> <span class="o">=</span>
+<span class="o">{</span>
+<span class="o">}</span>
+<span class="o">[</span>09:48:00<span class="o">]</span>: Template.__init__ enter, <span class="nv">name</span> <span class="o">=</span> themes/bootstrap/footer
+<span class="o">[</span>09:48:00<span class="o">]</span>: <span class="nv">sourcefile</span> <span class="o">=</span>/usr/lib/lua/luci/view/themes/bootstrap/footer.htm
+<span class="o">[</span>09:48:00<span class="o">]</span>: Template.__init__ <span class="nb">exit</span>
+<span class="o">[</span>09:48:00<span class="o">]</span>: Template.render enter, <span class="nv">scope</span> <span class="o">=</span>
+<span class="o">{</span>
+<span class="o">}</span>
+<span class="o">[</span>09:48:00<span class="o">]</span>: Template.render <span class="nb">exit</span>
+<span class="o">[</span>09:48:00<span class="o">]</span>: Template.render <span class="nb">exit</span>
+<span class="o">[</span>09:48:00<span class="o">]</span>: Template.render <span class="nb">exit</span>
+<span class="o">[</span>09:48:00<span class="o">]</span>: dispatcher.lua  httpdispatch <span class="nb">exit</span>
+<span class="o">[</span>09:48:00<span class="o">]</span>: dispatcher.lua  httpdispatch enter, <span class="nv">pathinfo</span> <span class="o">=</span> /admin/translations/en
+<span class="o">[</span>09:48:00<span class="o">]</span>: dispatch enter
+<span class="o">[</span>09:48:00<span class="o">]</span>: init_template_engine enter, <span class="nv">media</span> <span class="o">=</span> /luci-static/bootstrap
+<span class="o">[</span>09:48:00<span class="o">]</span>: Template.__init__ enter, <span class="nv">name</span> <span class="o">=</span> themes/bootstrap/header
+<span class="o">[</span>09:48:00<span class="o">]</span>: <span class="nv">sourcefile</span> <span class="o">=</span>/usr/lib/lua/luci/view/themes/bootstrap/header.htm
+<span class="o">[</span>09:48:00<span class="o">]</span>: Template.__init__ <span class="nb">exit</span>
+<span class="o">[</span>09:48:00<span class="o">]</span>: init_template_engine after Template themes/bootstrap/header
+<span class="o">[</span>09:48:00<span class="o">]</span>: init_template_engine <span class="nb">exit</span>
+<span class="o">[</span>09:48:00<span class="o">]</span>: dispatch <span class="nv">action</span> <span class="o">=</span>
+<span class="o">{</span>
+    <span class="nv">module</span> <span class="o">=</span> <span class="s1">&#39;luci.controller.admin.index&#39;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="s1">&#39;call&#39;</span>
+    <span class="k">function</span> <span class="o">=</span> <span class="s1">&#39;action_translations&#39;</span>
+<span class="o">}</span>
+<span class="o">[</span>09:48:00<span class="o">]</span>: dispatcher.lua  httpdispatch <span class="nb">exit</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>对应代码进行理解</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-lua" data-lang="lua"><span class="kd">local</span> <span class="n">tpl</span> <span class="o">=</span> <span class="n">init_template_engine</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+<span class="kr">if</span> <span class="n">action.type</span> <span class="o">==</span> <span class="s2">&#34;view&#34;</span> <span class="kr">then</span>
+    <span class="n">tpl.render</span><span class="p">(</span><span class="s2">&#34;view&#34;</span><span class="p">,</span> <span class="p">{</span> <span class="n">view</span> <span class="o">=</span> <span class="n">action.path</span> <span class="p">})</span>
+</code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-lua" data-lang="lua"><span class="kd">local</span> <span class="kr">function</span> <span class="nf">init_template_engine</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+	<span class="kd">local</span> <span class="n">tpl</span> <span class="o">=</span> <span class="n">require</span> <span class="s2">&#34;luci.template&#34;</span>
+	<span class="c1">-- ...</span>
+	<span class="kr">return</span> <span class="n">tpl</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>可以看出 init_template_engine 函数的返回值就是 <code>luci/template.lua</code> 模块，所以
+tpl.render 也就对应了文件 template.lua 中的 render 函数。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-lua" data-lang="lua"><span class="kr">function</span> <span class="nf">render</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">scope</span><span class="p">)</span>
+	<span class="kr">return</span> <span class="n">Template</span><span class="p">(</span><span class="n">name</span><span class="p">):</span><span class="n">render</span><span class="p">(</span><span class="n">scope</span> <span class="ow">or</span> <span class="n">getfenv</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+<span class="kr">end</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>render 函数会先创建一个 Template 对象，然后调用其 render 子函数。所以首先执行的就是 <code>Template.__init__</code> 函数。参数 name 的值为 view ，scope 的值为 <code>{view = 'system/system'}</code></p>
+<p>根据函数 <code>Template.__init__</code> 的代码</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-lua" data-lang="lua"><span class="kd">local</span> <span class="n">tparser</span> <span class="o">=</span> <span class="n">require</span> <span class="s2">&#34;luci.template.parser&#34;</span>
+
+<span class="n">self.template</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">tparser.parse</span><span class="p">(</span><span class="n">sourcefile</span><span class="p">)</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>我们知道此时会去读取文件 <code>/usr/lib/lua/luci/view/view.htm</code> 进行分析。看一下这个文件</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="err">&lt;</span>%+header%&gt;
+
+<span class="p">&lt;</span><span class="nt">div</span> <span class="na">id</span><span class="o">=</span><span class="s">&#34;view&#34;</span><span class="p">&gt;</span>
+	<span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&#34;spinning&#34;</span><span class="p">&gt;</span><span class="err">&lt;</span>%:Loading view…%&gt;<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+	<span class="p">&lt;</span><span class="nt">script</span> <span class="na">type</span><span class="o">=</span><span class="s">&#34;text/javascript&#34;</span><span class="p">&gt;</span>
+		<span class="nx">L</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s1">&#39;ui&#39;</span><span class="p">).</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
+			<span class="nx">ui</span><span class="p">.</span><span class="nx">instantiateView</span><span class="p">(</span><span class="s1">&#39;&lt;%=view%&gt;&#39;</span><span class="p">);</span>
+		<span class="p">});</span>
+	<span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+
+<span class="err">&lt;</span>%+footer%&gt;
+</code></pre></td></tr></table>
+</div>
+</div><p>还是比较简单的。这里需要理解一下 luci 的 template 解析时的语法。这里只对该 htm 文件涉及的内容做注解，完整的语法可以参考 <a href="https://github.com/openwrt/luci/blob/master/docs/Templates.md" target="_blank" rel="noopener noreffer">Templates.md on Github</a></p>
+<table>
+<thead>
+<tr>
+<th>标记</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&lt;%+header%&gt;</code></td>
+<td>载入名为 header 的 template</td>
+</tr>
+<tr>
+<td><code>&lt;%+footer%&gt;</code></td>
+<td>载入名为 footer 的 template</td>
+</tr>
+<tr>
+<td><code>&lt;%=view%&gt;</code></td>
+<td>读取 lua 中变量 view 的值，即 system/system</td>
+</tr>
+</tbody>
+</table>
+<p>由于 header 和 footer 都是 template，所以也会调用 Template 来解析。</p>
+<p>有兴趣可以看一下 tparser.parse 的源码。</p>
+<p>在 <code>/usr/lib/lua/luci/template</code> 目录可以看到里面只有一个 parser.so，所以 tparser
+其实就是这个动态库文件。那这个动态库是怎么来的呢？这就得看看 luci 的源码了。文件
+<code>luci-base/src/Makefile</code> 定义了 parser.so 的源码文件</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-makefile" data-lang="makefile"><span class="nf">parser.so</span><span class="o">:</span> <span class="n">template_parser</span>.<span class="n">o</span> <span class="n">template_utils</span>.<span class="n">o</span> <span class="n">template_lmo</span>.<span class="n">o</span> <span class="n">template_lualib</span>.<span class="n">o</span> <span class="n">plural_formula</span>.<span class="n">o</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>找到代码中的 <code>template_L_parse</code> 函数，就是 parse 的入口了。</p>
+<p>好了，回到刚才的 view.htm 文件。这个文件在经过 parse 之后其实就变成了如下的内容</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="c">&lt;!-- 当前主题对应的header.js 的内容 --&gt;</span>
+
+<span class="p">&lt;</span><span class="nt">div</span> <span class="na">id</span><span class="o">=</span><span class="s">&#34;view&#34;</span><span class="p">&gt;</span>
+	<span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&#34;spinning&#34;</span><span class="p">&gt;</span><span class="err">&lt;</span>%:Loading view…%&gt;<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+	<span class="p">&lt;</span><span class="nt">script</span> <span class="na">type</span><span class="o">=</span><span class="s">&#34;text/javascript&#34;</span><span class="p">&gt;</span>
+		<span class="nx">L</span><span class="p">.</span><span class="nx">require</span><span class="p">(</span><span class="s1">&#39;ui&#39;</span><span class="p">).</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">ui</span><span class="p">)</span> <span class="p">{</span>
+			<span class="nx">ui</span><span class="p">.</span><span class="nx">instantiateView</span><span class="p">(</span><span class="s1">&#39;&lt;system/system&gt;&#39;</span><span class="p">);</span>
+		<span class="p">});</span>
+	<span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+
+<span class="c">&lt;!-- 当前主题对应的footer.js 的内容 --&gt;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>这些内容会被服务器返回给浏览器客户端。然后浏览器客户端会调用其中嵌入的 js 脚本，执行脚本中的函数（来源于 luci.js）从服务器端获取需要的数据（通过 json 封装），完成最终的绘制。</p>
+<p>在早起的 luci 版本中绘制的工作是在服务器端通过 lua 脚本进行的；而现在这个绘制的工作则通过使用 js 的方式转移到了客户端浏览器来进行。</p>
+<h4 id="显示菜单">显示菜单</h4>
+<p>那么页面的菜单是如何显示的呢？答案是通过 header。看 一下 themes 里面的 <code>header.js</code>
+。</p>
+<p>以 <code>/usr/lib/lua/luci/view/themes//bootstrap/header.htm</code> 为例，在 <code>&lt;body&gt;</code> 中有如下语句：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="p">&lt;</span><span class="nt">header</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">ul</span> <span class="na">class</span><span class="o">=</span><span class="s">&#34;nav&#34;</span> <span class="na">id</span><span class="o">=</span><span class="s">&#34;topmenu&#34;</span> <span class="na">style</span><span class="o">=</span><span class="s">&#34;display:none&#34;</span><span class="p">&gt;&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">header</span><span class="p">&gt;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>上面的语句只是给 topmenu （也就是最上方横向的菜单）占位，而在
+<code>/usr/lib/lua/luci/view/themes/bootstrap/footer.htm</code> 中载入了 menu 的具体内容</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">&lt;script <span class="nv">type</span><span class="o">=</span><span class="s2">&#34;text/javascript&#34;</span>&gt;L.require<span class="o">(</span><span class="s1">&#39;menu-bootstrap&#39;</span><span class="o">)</span>&lt;/script&gt;
+</code></pre></td></tr></table>
+</div>
+</div><p>看看这个 <code>/www/luci-static/resources/menu-bootstrap.js</code> 里面又是什么?</p>
+<ul>
+<li>renderModeMenu</li>
+<li>renderMainMenu 把内容写入 topmenu（一层菜单）</li>
+<li>renderTabMenu  把内容写入 tabmenu （二层菜单）</li>
+</ul>
+<!--listend-->
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="s2">&#34;admin/system/admin&#34;</span>: <span class="o">{</span>
+        <span class="s2">&#34;title&#34;</span>: <span class="s2">&#34;Administration&#34;</span>,
+        <span class="s2">&#34;order&#34;</span>: 2,
+        <span class="s2">&#34;action&#34;</span>: <span class="o">{</span>
+                <span class="s2">&#34;type&#34;</span>: <span class="s2">&#34;firstchild&#34;</span>
+        <span class="o">}</span>,
+        <span class="s2">&#34;depends&#34;</span>: <span class="o">{</span>
+                <span class="s2">&#34;acl&#34;</span>: <span class="o">[</span> <span class="s2">&#34;luci-mod-system-config&#34;</span>, <span class="s2">&#34;luci-mod-system-ssh&#34;</span> <span class="o">]</span>
+        <span class="o">}</span>
+<span class="o">}</span>,
+
+<span class="s2">&#34;admin/system/admin/password&#34;</span>: <span class="o">{</span>
+        <span class="s2">&#34;title&#34;</span>: <span class="s2">&#34;Router Password&#34;</span>,
+        <span class="s2">&#34;order&#34;</span>: 1,
+        <span class="s2">&#34;action&#34;</span>: <span class="o">{</span>
+                <span class="s2">&#34;type&#34;</span>: <span class="s2">&#34;view&#34;</span>,
+                <span class="s2">&#34;path&#34;</span>: <span class="s2">&#34;system/password&#34;</span>
+        <span class="o">}</span>,
+        <span class="s2">&#34;depends&#34;</span>: <span class="o">{</span>
+                <span class="s2">&#34;acl&#34;</span>: <span class="o">[</span> <span class="s2">&#34;luci-mod-system-config&#34;</span> <span class="o">]</span>
+        <span class="o">}</span>
+<span class="o">}</span>,
+</code></pre></td></tr></table>
+</div>
+</div><p>说一层菜单，二层菜单可能不太好理解，对应到
+<code>/usr/share/luci/menu.d/luci-mod-system.json</code> 里面的内容就会好理解一些。比如上面的 admin 就是一层菜单，显示在最上面的菜单的 system 的子菜单中；而 admin/password
+就是二层菜单显示在主界面的最上方的 tab 页。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">
+   +-----------------------------------------+
+   <span class="p">|</span>  +-----------------------------------+  <span class="p">|</span>
+   <span class="p">|</span>  <span class="p">|</span>Status System Service Network ...  <span class="p">|</span>  <span class="p">|</span>
+   <span class="p">|</span>  +-----------------------------------+  <span class="p">|</span>
+   <span class="p">|</span>  +-----------------------------------+  <span class="p">|</span>
+   <span class="p">|</span>  <span class="p">|</span>Router Password ... <span class="p">|</span>              <span class="p">|</span>  <span class="p">|</span>
+   <span class="p">|</span>  +--------------------+              <span class="p">|</span>  <span class="p">|</span>
+   <span class="p">|</span>  <span class="p">|</span>                                   <span class="p">|</span>  <span class="p">|</span>
+   <span class="p">|</span>  <span class="p">|</span>                                   <span class="p">|</span>  <span class="p">|</span>
+   <span class="p">|</span>  <span class="p">|</span>                                   <span class="p">|</span>  <span class="p">|</span>
+   <span class="p">|</span>  <span class="p">|</span>                                   <span class="p">|</span>  <span class="p">|</span>
+   <span class="p">|</span>  <span class="p">|</span>                                   <span class="p">|</span>  <span class="p">|</span>
+   <span class="p">|</span>  <span class="p">|</span>                                   <span class="p">|</span>  <span class="p">|</span>
+   <span class="p">|</span>  +-----------------------------------+  <span class="p">|</span>
+   +-----------------------------------------+
+
+</code></pre></td></tr></table>
+</div>
+</div><p>其中，Status 所在的那一层菜单就是第一层（topmenu），而 Router Paswsword 所在的就是第二层菜单（tabmenu）。</p>
+<p>了解了原理，那么如果需要自己定制化界面，比如添加侧边的 menu，可以用同样的方法，在 header.htm 中添加</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="p">&lt;</span><span class="nt">div</span> <span class="na">id</span><span class="o">=</span><span class="s">&#34;sidemenu&#34;</span> <span class="na">style</span><span class="o">=</span><span class="s">&#34;display:none&#34;</span><span class="p">&gt;&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>然后在对应的 menu-xxx.js 文件中加入 render 的代码即可。</p>
+<h3 id="action-dot-type-firstchild">action.type == firstchild</h3>
+<p>再来看 firstchild 。就以上面的 System-&gt;Administrator 为例。可以看到如下的调试信息</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">root@OpenWrt:/usr/lib/lua/luci# :&gt;/tmp/luci.output <span class="o">&amp;&amp;</span> tail -f /tmp/luci.output
+<span class="o">[</span>08:58:51<span class="o">]</span>: dispatcher.lua  httpdispatch enter, <span class="nv">pathinfo</span> <span class="o">=</span> /admin/system/admin
+<span class="o">[</span>08:58:51<span class="o">]</span>: dispatch enter
+<span class="o">[</span>08:58:51<span class="o">]</span>: init_template_engine enter, <span class="nv">media</span> <span class="o">=</span> /luci-static/bootstrap
+<span class="o">[</span>08:58:51<span class="o">]</span>: Template.__init__ enter, <span class="nv">name</span> <span class="o">=</span> themes/bootstrap/header
+<span class="o">[</span>08:58:51<span class="o">]</span>: <span class="nv">sourcefile</span> <span class="o">=</span>/usr/lib/lua/luci/view/themes/bootstrap/header.htm
+<span class="o">[</span>08:58:51<span class="o">]</span>: Template.__init__ <span class="nb">exit</span>
+<span class="o">[</span>08:58:51<span class="o">]</span>: init_template_engine after Template themes/bootstrap/header
+<span class="o">[</span>08:58:51<span class="o">]</span>: init_template_engine <span class="nb">exit</span>
+<span class="o">[</span>08:58:51<span class="o">]</span>: dispatch <span class="nv">action</span> <span class="o">=</span>
+<span class="o">{</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="s1">&#39;firstchild&#39;</span>
+<span class="o">}</span>
+<span class="o">[</span>08:58:51<span class="o">]</span>: dispatch enter
+<span class="o">[</span>08:58:51<span class="o">]</span>: init_template_engine enter, <span class="nv">media</span> <span class="o">=</span> /luci-static/bootstrap
+<span class="o">[</span>08:58:51<span class="o">]</span>: Template.__init__ enter, <span class="nv">name</span> <span class="o">=</span> themes/bootstrap/header
+<span class="o">[</span>08:58:51<span class="o">]</span>: Template.__init__ <span class="nb">exit</span>
+<span class="o">[</span>08:58:51<span class="o">]</span>: init_template_engine after Template themes/bootstrap/header
+<span class="o">[</span>08:58:51<span class="o">]</span>: init_template_engine <span class="nb">exit</span>
+<span class="o">[</span>08:58:51<span class="o">]</span>: dispatch <span class="nv">action</span> <span class="o">=</span>
+<span class="o">{</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="s1">&#39;view&#39;</span>
+    <span class="nv">path</span> <span class="o">=</span> <span class="s1">&#39;system/password&#39;</span>
+<span class="o">}</span>
+<span class="o">[</span>08:58:51<span class="o">]</span>: Template.__init__ enter, <span class="nv">name</span> <span class="o">=</span> view
+<span class="o">[</span>08:58:51<span class="o">]</span>: <span class="nv">sourcefile</span> <span class="o">=</span>/usr/lib/lua/luci/view/view.htm
+<span class="o">[</span>08:58:51<span class="o">]</span>: Template.__init__ <span class="nb">exit</span>
+<span class="o">[</span>08:58:51<span class="o">]</span>: Template.render enter, <span class="nv">scope</span> <span class="o">=</span>
+<span class="o">{</span>
+    <span class="nv">view</span> <span class="o">=</span> <span class="s1">&#39;system/password&#39;</span>
+<span class="o">}</span>
+<span class="o">[</span>08:58:51<span class="o">]</span>: Template.__init__ enter, <span class="nv">name</span> <span class="o">=</span> header
+<span class="o">[</span>08:58:51<span class="o">]</span>: <span class="nv">sourcefile</span> <span class="o">=</span>/usr/lib/lua/luci/view/header.htm
+<span class="o">[</span>08:58:51<span class="o">]</span>: Template.__init__ <span class="nb">exit</span>
+<span class="o">[</span>08:58:51<span class="o">]</span>: Template.render enter, <span class="nv">scope</span> <span class="o">=</span>
+<span class="o">{</span>
+<span class="o">}</span>
+<span class="o">[</span>08:58:51<span class="o">]</span>: Template.__init__ enter, <span class="nv">name</span> <span class="o">=</span> themes/bootstrap/header
+<span class="o">[</span>08:58:51<span class="o">]</span>: Template.__init__ <span class="nb">exit</span>
+<span class="o">[</span>08:58:51<span class="o">]</span>: Template.render enter, <span class="nv">scope</span> <span class="o">=</span>
+<span class="o">{</span>
+<span class="o">}</span>
+<span class="o">[</span>08:58:51<span class="o">]</span>: Template.render <span class="nb">exit</span>
+<span class="o">[</span>08:58:51<span class="o">]</span>: Template.render <span class="nb">exit</span>
+<span class="o">[</span>08:58:51<span class="o">]</span>: Template.__init__ enter, <span class="nv">name</span> <span class="o">=</span> footer
+<span class="o">[</span>08:58:51<span class="o">]</span>: <span class="nv">sourcefile</span> <span class="o">=</span>/usr/lib/lua/luci/view/footer.htm
+<span class="o">[</span>08:58:51<span class="o">]</span>: Template.__init__ <span class="nb">exit</span>
+<span class="o">[</span>08:58:51<span class="o">]</span>: Template.render enter, <span class="nv">scope</span> <span class="o">=</span>
+<span class="o">{</span>
+<span class="o">}</span>
+<span class="o">[</span>08:58:51<span class="o">]</span>: Template.__init__ enter, <span class="nv">name</span> <span class="o">=</span> themes/bootstrap/footer
+<span class="o">[</span>08:58:51<span class="o">]</span>: <span class="nv">sourcefile</span> <span class="o">=</span>/usr/lib/lua/luci/view/themes/bootstrap/footer.htm
+<span class="o">[</span>08:58:51<span class="o">]</span>: Template.__init__ <span class="nb">exit</span>
+<span class="o">[</span>08:58:51<span class="o">]</span>: Template.render enter, <span class="nv">scope</span> <span class="o">=</span>
+<span class="o">{</span>
+<span class="o">}</span>
+<span class="o">[</span>08:58:51<span class="o">]</span>: Template.render <span class="nb">exit</span>
+<span class="o">[</span>08:58:51<span class="o">]</span>: Template.render <span class="nb">exit</span>
+<span class="o">[</span>08:58:51<span class="o">]</span>: Template.render <span class="nb">exit</span>
+<span class="o">[</span>08:58:51<span class="o">]</span>: dispatcher.lua  httpdispatch <span class="nb">exit</span>
+<span class="o">[</span>08:58:51<span class="o">]</span>: dispatcher.lua  httpdispatch enter, <span class="nv">pathinfo</span> <span class="o">=</span> /admin/translations/en
+<span class="o">[</span>08:58:51<span class="o">]</span>: dispatch enter
+<span class="o">[</span>08:58:51<span class="o">]</span>: init_template_engine enter, <span class="nv">media</span> <span class="o">=</span> /luci-static/bootstrap
+<span class="o">[</span>08:58:51<span class="o">]</span>: Template.__init__ enter, <span class="nv">name</span> <span class="o">=</span> themes/bootstrap/header
+<span class="o">[</span>08:58:51<span class="o">]</span>: <span class="nv">sourcefile</span> <span class="o">=</span>/usr/lib/lua/luci/view/themes/bootstrap/header.htm
+<span class="o">[</span>08:58:51<span class="o">]</span>: Template.__init__ <span class="nb">exit</span>
+<span class="o">[</span>08:58:51<span class="o">]</span>: init_template_engine after Template themes/bootstrap/header
+<span class="o">[</span>08:58:51<span class="o">]</span>: init_template_engine <span class="nb">exit</span>
+<span class="o">[</span>08:58:51<span class="o">]</span>: dispatch <span class="nv">action</span> <span class="o">=</span>
+<span class="o">{</span>
+    <span class="nv">module</span> <span class="o">=</span> <span class="s1">&#39;luci.controller.admin.index&#39;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="s1">&#39;call&#39;</span>
+    <span class="k">function</span> <span class="o">=</span> <span class="s1">&#39;action_translations&#39;</span>
+<span class="o">}</span>
+<span class="o">[</span>08:58:51<span class="o">]</span>: dispatcher.lua  httpdispatch <span class="nb">exit</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>结合代码</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-lua" data-lang="lua">	<span class="kr">elseif</span> <span class="n">action.type</span> <span class="o">==</span> <span class="s2">&#34;firstchild&#34;</span> <span class="kr">then</span>
+		<span class="kd">local</span> <span class="n">sub_request</span> <span class="o">=</span> <span class="n">find_subnode</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">requested_path_full</span><span class="p">,</span> <span class="n">action.recurse</span><span class="p">)</span>
+		<span class="kr">if</span> <span class="n">sub_request</span> <span class="kr">then</span>
+			<span class="n">dispatch</span><span class="p">(</span><span class="n">sub_request</span><span class="p">)</span>
+		<span class="kr">else</span>
+			<span class="n">tpl.render</span><span class="p">(</span><span class="s2">&#34;empty_node_placeholder&#34;</span><span class="p">,</span> <span class="n">getfenv</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+		<span class="kr">end</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>可以看到其实就是找到第一个子节点，然后进行显示。</p>
+<h2 id="faq">FAQ</h2>
+<h3 id="什么是-cbi">什么是 CBI</h3>
+<p>CBI 是 Configuration Bind Interface 的缩写。在 <a href="https://gitlab.nic.cz/turris/luci-cs/blob/a3bebe925cdefa56a1671d0919d797ef230cadd5/libs/cbi/luasrc/cbi.lua" target="_blank" rel="noopener noreffer">老的源码</a> 中有以下说明</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">Description:
+
+Offers an interface <span class="k">for</span> binding configuration values to certain data
+types. Supports value and range validation and basic dependencies.
+</code></pre></td></tr></table>
+</div>
+</div><p>简单的理解，CBI 就是一个库，提供了一系列的接口用来在 uci 的配置文件和相关的语言（lua 或者 js）的对象之间进行转换。</p>
+<h3 id="为什么-luci-提供了-2-套-api">为什么 luci 提供了 2 套 API?</h3>
+<p>翻看 luci 的官方说明文档，会发现提供了 2 套 api。一套是 lua 的，一套是 js 的。</p>
+<p>根据资料，最初 luci 的设计是通过 lua 脚本来生成界面元素（后端），后来考虑到效率问题，把页面的生成转移到到了客户端浏览器（前端），所以改成了 js 的方式。</p>
+<h3 id="有哪些相关的目录">有哪些相关的目录？</h3>
+<p>从 openwrt 开发板的角度来看，有以下的相关目录或文件</p>
+<ul>
+<li>
+<p>/usr/share/luci/menu.d 存放菜单配置</p>
+</li>
+<li>
+<p>/www</p>
+<ul>
+<li>luci-static/resources/view 存放页面对应的 js 文件</li>
+</ul>
+</li>
+<li>
+<p>/usr/lib/lua/luci</p>
+<ul>
+<li>/usr/lib/lua/luci/model 动态获取数据的 lua 脚本</li>
+<li>/usr/lib/lua/luci/view htm 格式的静态网页文件</li>
+</ul>
+</li>
+<li>
+<p>/usr/share/luci/menu.d/luci-base.json</p>
+<ul>
+<li>[admin/status, type: firstchild]
+<ul>
+<li>/usr/share/luci/menu.d/luci-mod-status.json
+<ul>
+<li>[admin/status/overview, type: template, path: admin_status/index]
+<ul>
+<li>/usr/lib/lua/luci/view/admin_status/index.htm</li>
+</ul>
+</li>
+<li>[admin/status/iptables, type: view, path: status/iptables]
+<ul>
+<li>luci-static/resources/view/status/iptables.js</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="luci-的-theme-是怎么应用的">luci 的 theme 是怎么应用的？</h3>
+<p>相关的目录有</p>
+<ul>
+<li>/usr/lib/lua/luci/view/themes/&lt;themes-name&gt; 存放 header.htm 和 footer.htm</li>
+<li>/www/luci-static/&lt;themes-name&gt; 存放相关的 css, js, image 等</li>
+<li>/etc/uci-defaults</li>
+<li>/etc/config/luci</li>
+</ul>
+<p>举例，你新创建了一个主题，名字叫 vodacom，那么通过以下指令可以切过去</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">uci <span class="nb">set</span> luci.main.mediaurlbase<span class="o">=</span>/luci-static/vodacom
+uci commit luci
+</code></pre></td></tr></table>
+</div>
+</div><p>要恢复成老的界面，只需要</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">uci <span class="nb">set</span> luci.main.mediaurlbase<span class="o">=</span>/luci-static/bootstrap
+uci commit luci
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="修改后如何更新">修改后如何更新？</h3>
+<p>删除 cache</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">rm -rf /tmp/luci-*
+</code></pre></td></tr></table>
+</div>
+</div><p>然后通过以下命令禁止 cache，这样以后就不用删除 cache 了</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">uci <span class="nb">set</span> luci.ccache.enable<span class="o">=</span>0<span class="p">;</span> uci commit luci
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="调试">调试</h2>
+<p>luci 的关键功能很多都是在 lua 脚本中实现的。因此为了能进行调试，我们可以在目录
+<code>/usr/lib/lua/luci</code> 中添加文件 <code>log.lua</code> ，内容如下</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="n">local</span> <span class="n">M</span> <span class="o">=</span> <span class="p">{}</span>
+
+<span class="n">local</span> <span class="n">tconcat</span> <span class="o">=</span> <span class="n">table</span><span class="p">.</span><span class="n">concat</span>
+<span class="n">local</span> <span class="n">tinsert</span> <span class="o">=</span> <span class="n">table</span><span class="p">.</span><span class="n">insert</span>
+<span class="n">local</span> <span class="n">srep</span> <span class="o">=</span> <span class="n">string</span><span class="p">.</span><span class="n">rep</span>
+
+<span class="n">local</span> <span class="n">function</span> <span class="n">local_print</span><span class="p">(</span><span class="n">str</span><span class="p">)</span>
+    <span class="n">local</span> <span class="n">dbg</span> <span class="o">=</span> <span class="n">io</span><span class="p">.</span><span class="n">open</span><span class="p">(</span><span class="s">&#34;/tmp/luci.output&#34;</span><span class="p">,</span> <span class="s">&#34;a+&#34;</span><span class="p">)</span>
+    <span class="n">local</span> <span class="n">str</span> <span class="o">=</span> <span class="n">str</span> <span class="n">or</span> <span class="s">&#34;&#34;</span>
+    <span class="k">if</span> <span class="n">dbg</span> <span class="n">then</span>
+        <span class="nl">dbg</span><span class="p">:</span><span class="n">write</span><span class="p">(</span><span class="n">str</span><span class="p">..</span><span class="sc">&#39;\n&#39;</span><span class="p">)</span>
+        <span class="nl">dbg</span><span class="p">:</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">end</span>
+<span class="n">end</span>
+
+<span class="n">function</span> <span class="n">M</span><span class="p">.</span><span class="n">print</span><span class="p">(...)</span>
+    <span class="n">local</span> <span class="n">dbg</span> <span class="o">=</span> <span class="n">io</span><span class="p">.</span><span class="n">open</span><span class="p">(</span><span class="s">&#34;/tmp/luci.output&#34;</span><span class="p">,</span> <span class="s">&#34;a+&#34;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dbg</span> <span class="n">then</span>
+        <span class="nl">dbg</span><span class="p">:</span><span class="n">write</span><span class="p">(</span><span class="n">os</span><span class="p">.</span><span class="n">date</span><span class="p">(</span><span class="s">&#34;[%H:%M:%S]: &#34;</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">o</span> <span class="n">in</span> <span class="n">ipairs</span><span class="p">({...})</span> <span class="k">do</span>
+            <span class="nl">dbg</span><span class="p">:</span><span class="n">write</span><span class="p">(</span><span class="n">tostring</span><span class="p">(</span><span class="n">o</span><span class="p">)..</span><span class="err">&#39;</span>  <span class="err">&#39;</span><span class="p">)</span>
+        <span class="n">end</span>
+        <span class="nl">dbg</span><span class="p">:</span><span class="n">write</span><span class="p">(</span><span class="s">&#34;</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">)</span>
+        <span class="nl">dbg</span><span class="p">:</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">end</span>
+<span class="n">end</span>
+
+<span class="n">function</span> <span class="n">M</span><span class="p">.</span><span class="n">print_r</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">depth</span><span class="p">)</span>
+    <span class="n">local</span> <span class="n">depth</span> <span class="o">=</span> <span class="n">depth</span> <span class="n">or</span> <span class="mi">3</span>
+    <span class="n">local</span> <span class="n">cstring</span> <span class="o">=</span> <span class="s">&#34;&#34;</span><span class="p">;</span>
+    <span class="n">local</span> <span class="n">top_flag</span> <span class="o">=</span> <span class="nb">true</span>
+
+    <span class="n">local</span> <span class="n">function</span> <span class="n">table_len</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+    <span class="n">local</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="n">in</span> <span class="n">pairs</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">do</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">end</span>
+    <span class="k">return</span> <span class="n">i</span>
+    <span class="n">end</span>
+
+    <span class="n">local</span> <span class="n">function</span> <span class="n">tableprint</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">cstring</span><span class="p">,</span> <span class="n">local_depth</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="o">==</span> <span class="n">nil</span> <span class="n">then</span>
+            <span class="n">local_print</span><span class="p">(</span><span class="s">&#34;core.print data is nil&#34;</span><span class="p">);</span>
+        <span class="n">end</span>
+
+        <span class="n">local</span> <span class="n">cs</span> <span class="o">=</span> <span class="n">cstring</span> <span class="p">..</span> <span class="s">&#34;    &#34;</span><span class="p">;</span>
+    <span class="k">if</span> <span class="n">top_flag</span> <span class="n">then</span>
+            <span class="nf">local_print</span><span class="p">(</span><span class="n">cstring</span> <span class="p">..</span><span class="s">&#34;{&#34;</span><span class="p">);</span>
+        <span class="n">top_flag</span> <span class="o">=</span> <span class="nb">false</span>
+    <span class="n">end</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">==</span><span class="s">&#34;table&#34;</span><span class="p">)</span> <span class="n">then</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="n">in</span> <span class="n">pairs</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="k">do</span>
+        <span class="k">if</span> <span class="n">type</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">~=</span> <span class="s">&#34;table&#34;</span> <span class="n">then</span>
+            <span class="k">if</span> <span class="n">type</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">==</span> <span class="s">&#34;string&#34;</span> <span class="n">then</span>
+                        <span class="n">local_print</span><span class="p">(</span><span class="n">cs</span><span class="p">..</span><span class="n">tostring</span><span class="p">(</span><span class="n">k</span><span class="p">)..</span><span class="s">&#34; = &#34;</span><span class="p">..</span><span class="s">&#34;&#39;&#34;</span><span class="p">..</span><span class="n">tostring</span><span class="p">(</span><span class="n">v</span><span class="p">)..</span><span class="s">&#34;&#39;&#34;</span><span class="p">);</span>
+            <span class="k">else</span>
+                        <span class="nf">local_print</span><span class="p">(</span><span class="n">cs</span><span class="p">..</span><span class="n">tostring</span><span class="p">(</span><span class="n">k</span><span class="p">)..</span><span class="s">&#34; = &#34;</span><span class="p">..</span><span class="n">tostring</span><span class="p">(</span><span class="n">v</span><span class="p">));</span>
+            <span class="n">end</span>
+        <span class="n">elseif</span> <span class="nf">table_len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="n">then</span>
+            <span class="n">local_print</span><span class="p">(</span><span class="n">cs</span><span class="p">..</span><span class="n">tostring</span><span class="p">(</span><span class="n">k</span><span class="p">)..</span><span class="s">&#34; = &#34;</span><span class="p">..</span><span class="s">&#34;</span><span class="p">{}</span><span class="s">&#34;)</span>
+        <span class="n">elseif</span> <span class="n">local_depth</span> <span class="o">&lt;</span> <span class="n">depth</span> <span class="n">then</span>
+                    <span class="n">local_print</span><span class="p">(</span><span class="n">cs</span><span class="p">..</span><span class="n">tostring</span><span class="p">(</span><span class="n">k</span><span class="p">)..</span><span class="s">&#34; = {&#34;</span><span class="p">);</span>
+                      <span class="n">tableprint</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="n">cs</span><span class="p">,</span><span class="n">local_depth</span><span class="o">+</span><span class="mi">1</span><span class="p">);</span>
+        <span class="k">else</span>
+            <span class="nf">local_print</span><span class="p">(</span><span class="n">cs</span><span class="p">..</span><span class="n">tostring</span><span class="p">(</span><span class="n">k</span><span class="p">)..</span><span class="s">&#34; = &#34;</span><span class="p">..</span><span class="s">&#34;</span><span class="p">{</span><span class="o">*</span><span class="p">}</span><span class="s">&#34;)</span>
+        <span class="n">end</span>
+            <span class="n">end</span>
+        <span class="k">else</span>
+            <span class="nf">local_print</span><span class="p">(</span><span class="n">cs</span><span class="p">..</span><span class="n">tostring</span><span class="p">(</span><span class="n">data</span><span class="p">));</span>
+        <span class="n">end</span>
+        <span class="nf">local_print</span><span class="p">(</span><span class="n">cstring</span> <span class="p">..</span><span class="s">&#34;}&#34;</span><span class="p">);</span>
+    <span class="n">end</span>
+
+    <span class="nf">tableprint</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">cstring</span><span class="p">,</span><span class="mi">0</span><span class="p">);</span>
+<span class="n">end</span>
+
+<span class="k">return</span> <span class="n">M</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>然后用类似以下的方式使用。比如在 dispatcher.lua 的开头添加</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-lua" data-lang="lua"><span class="kd">local</span> <span class="n">log</span> <span class="o">=</span> <span class="n">require</span> <span class="s2">&#34;luci.log&#34;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>在函数 <code>dispatch</code> 中打印</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-lua" data-lang="lua"><span class="n">log.print</span><span class="p">(</span><span class="s2">&#34;action.type =&#34;</span><span class="o">..</span><span class="n">action.type</span><span class="p">)</span>
+<span class="n">log.print_r</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>这样在刷新页面时，用以下命令就可以看到调试输出了</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">tail -f /tmp/luci.output
+</code></pre></td></tr></table>
+</div>
+</div><p>注意如果看不到输出，那可能是你的 cache 没有禁用或清除。</p>
+<p>如果调试的时候要获取当前文件名，可以用以下函数</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-lua" data-lang="lua"><span class="kr">function</span> <span class="nf">__FILE__</span><span class="p">()</span>
+    <span class="kr">return</span> <span class="n">debug.getinfo</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;S&#39;</span><span class="p">).</span><span class="n">source</span><span class="p">:</span><span class="n">match</span><span class="p">(</span><span class="s2">&#34;^.+/(.+)$&#34;</span><span class="p">)</span>
+<span class="kr">end</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="参考">参考</h2>
+<ul>
+<li><a href="https://github.com/seamustuohy/luci_tutorials" target="_blank" rel="noopener noreffer">luci_tutorials</a></li>
+<li><a href="https://github.com/openwrt/luci/tree/master/docs" target="_blank" rel="noopener noreffer">https://github.com/openwrt/luci/tree/master/docs</a></li>
+<li><a href="https://openwrt.org/docs/guide-developer/luci" target="_blank" rel="noopener noreffer">https://openwrt.org/docs/guide-developer/luci</a></li>
+<li><a href="http://openwrt.github.io/luci/jsapi/index.html" target="_blank" rel="noopener noreffer">http://openwrt.github.io/luci/jsapi/index.html</a></li>
+<li><a href="https://weimarnetz.de/blog/artikel/howto-write-new-luci-apps" target="_blank" rel="noopener noreffer">Howto write new LuCI apps</a></li>
+<li><a href="https://github.com/openwrt/luci/commit/9ae591b38fedf16c3e5c97350b7182c5e28ed71f#diff-27855472049b664538cca7ef50c43df8" target="_blank" rel="noopener noreffer">Example to convert lua to js</a></li>
+<li><a href="https://github.com/openwrt/luci/wiki/DevelopmentEnvironmentHowTo" target="_blank" rel="noopener noreffer">HowTo: Setting up a Development Environment</a></li>
+<li><a href="https://icode.best/i/39853430929644" target="_blank" rel="noopener noreffer">LuCI入门</a>  <a href="https://icode.best/i/47766730937809%20" target="_blank" rel="noopener noreffer">LuCI之CBI</a>  <a href="https://icode.best/i/71684130952721%20%20" target="_blank" rel="noopener noreffer">LuCI之UCI</a></li>
+</ul>
+</div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>更新于 2022-08-04</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="分享到 Twitter" data-sharer="twitter" data-url="https://f0ghua.github.io/openwrt-luci/" data-title="openwrt luci工作原理浅析"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Facebook" data-sharer="facebook" data-url="https://f0ghua.github.io/openwrt-luci/"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Hacker News" data-sharer="hackernews" data-url="https://f0ghua.github.io/openwrt-luci/" data-title="openwrt luci工作原理浅析"><i class="fab fa-hacker-news fa-fw"></i></a><a href="javascript:void(0);" title="分享到 Line" data-sharer="line" data-url="https://f0ghua.github.io/openwrt-luci/" data-title="openwrt luci工作原理浅析"><i data-svg-src="https://cdn.jsdelivr.net/npm/simple-icons@2.14.0/icons/line.svg"></i></a><a href="javascript:void(0);" title="分享到 微博" data-sharer="weibo" data-url="https://f0ghua.github.io/openwrt-luci/" data-title="openwrt luci工作原理浅析"><i class="fab fa-weibo fa-fw"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">返回</a></span>&nbsp;|&nbsp;<span><a href="/">主页</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/linux_proc/" class="prev" rel="prev" title="内核空间和用户空间通信 - proc 虚拟文件系统"><i class="fas fa-angle-left fa-fw"></i>内核空间和用户空间通信 - proc 虚拟文件系统</a></div>
+</div>
+<div id="comments"><div id="utterances"></div><noscript>
+                Please enable JavaScript to view the comments powered by <a href="https://utteranc.es/">Utterances</a>.
+            </noscript></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2022</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">fog</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="回到顶部">
+                <i class="fas fa-arrow-up fa-fw"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="查看评论">
+                <i class="fas fa-comment fa-fw"></i>
+            </a>
+        </div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/css/lightgallery.min.css"><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/smooth-scroll@16.1.3/dist/smooth-scroll.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/autocomplete.js@0.37.1/dist/autocomplete.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/algoliasearch@4.2.0/dist/algoliasearch-lite.umd.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lazysizes@5.2.2/lazysizes.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lightgallery.js@1.2.0/dist/js/lightgallery.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lg-thumbnail.js@1.2.0/dist/lg-thumbnail.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lg-zoom.js@1.2.0/dist/lg-zoom.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js"></script><script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sharer.js@0.4.0/sharer.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"复制到剪贴板","maxShownLines":10},"comment":{"utterances":{"darkTheme":"github-dark","issueTerm":"pathname","label":"","lightTheme":"github-light","repo":"f0ghua/hugo_comments"}},"lightGallery":{"actualSize":false,"exThumbImage":"data-thumbnail","hideBarsDelay":2000,"selector":".lightgallery","speed":400,"thumbContHeight":80,"thumbWidth":80,"thumbnail":true},"search":{"algoliaAppID":"I9I6IQKZY4","algoliaIndex":"index.cn","algoliaSearchKey":"604ef86245b2a95cadc730cb1dde0244","highlightTag":"em","maxResultLength":10,"noResultsFound":"没有找到结果","snippetLength":50,"type":"algolia"}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>
