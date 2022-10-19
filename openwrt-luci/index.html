@@ -10,7 +10,7 @@
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://f0ghua.github.io/openwrt-luci/" /><meta property="og:image" content="https://f0ghua.github.io/logo.png"/><meta property="article:section" content="posts" />
 <meta property="article:published_time" content="2022-08-04T17:51:00+08:00" />
-<meta property="article:modified_time" content="2022-08-05T09:23:25+08:00" />
+<meta property="article:modified_time" content="2022-10-19T13:57:07+08:00" />
 
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:image" content="https://f0ghua.github.io/logo.png"/>
@@ -29,8 +29,8 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "https:\/\/f0ghua.github.io\/openwrt-luci\/"
-        },"image": ["https:\/\/f0ghua.github.io\/images\/Apple-Devices-Preview.png"],"genre": "posts","wordcount":  3670 ,
-        "url": "https:\/\/f0ghua.github.io\/openwrt-luci\/","datePublished": "2022-08-04T17:51:00+08:00","dateModified": "2022-08-05T09:23:25+08:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
+        },"image": ["https:\/\/f0ghua.github.io\/images\/Apple-Devices-Preview.png"],"genre": "posts","wordcount":  3934 ,
+        "url": "https:\/\/f0ghua.github.io\/openwrt-luci\/","datePublished": "2022-08-04T17:51:00+08:00","dateModified": "2022-10-19T13:57:07+08:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
             "@type": "Organization",
             "name": "xxxx","logo": "https:\/\/f0ghua.github.io\/images\/avatar.png"},"author": {
                 "@type": "Person",
@@ -110,7 +110,7 @@
             <div class="toc-content" id="toc-content-auto"></div>
         </div><article class="page single"><h1 class="single-title animated flipInX">openwrt LUCI工作原理浅析</h1><div class="post-meta">
             <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>fog</a></span></div>
-            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-08-04">2022-08-04</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 3670 字&nbsp;
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-08-04">2022-08-04</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 3934 字&nbsp;
                 <i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 8 分钟&nbsp;</div>
         </div><div class="details toc" id="toc-static"  kept="">
                 <div class="details-summary toc-title">
@@ -121,12 +121,14 @@
   <ul>
     <li><a href="#luci-的工作原理">LUCI 的工作原理</a>
       <ul>
-        <li><a href="#action-dot-type-view">action.type == view</a>
+        <li><a href="#页面显示">页面显示</a>
           <ul>
+            <li><a href="#action-dot-type-view">action.type == view</a></li>
             <li><a href="#显示菜单">显示菜单</a></li>
+            <li><a href="#action-dot-type-firstchild">action.type == firstchild</a></li>
           </ul>
         </li>
-        <li><a href="#action-dot-type-firstchild">action.type == firstchild</a></li>
+        <li><a href="#页面设置">页面设置</a></li>
       </ul>
     </li>
     <li><a href="#faq">FAQ</a>
@@ -155,7 +157,8 @@ uhttpd 可以实现简单快速的页面开发和访问配置。</p>
 <pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">/usr/sbin/uhttpd -f -h /www -r OpenWrt -x /cgi-bin -u /ubus -t <span class="m">60</span> -T <span class="m">30</span> -k <span class="m">20</span> -A <span class="m">1</span> -n <span class="m">3</span> -N <span class="m">100</span> -R -p 0.0.0.0:80 -p <span class="o">[</span>::<span class="o">]</span>:80
 </code></pre></td></tr></table>
 </div>
-</div><p>以访问主页面为例。访问的页面为 <a href="http://192.168.1.1/" target="_blank" rel="noopener noreffer">http://192.168.1.1/</a> ，此时访问的是 uhttpd 提供的 80
+</div><h3 id="页面显示">页面显示</h3>
+<p>以访问主页面为例。访问的页面为 <a href="http://192.168.1.1/" target="_blank" rel="noopener noreffer">http://192.168.1.1/</a> ，此时访问的是 uhttpd 提供的 80
 端口开放的服务。</p>
 <p>查看 uhttpd 的配置文件 <code>/etc/config/uhttpd</code> 可以知道</p>
 <div class="highlight"><div class="chroma">
@@ -290,7 +293,7 @@ config cert <span class="s1">&#39;defaults&#39;</span>
 </div>
 </div><p>dispatch 函数会先根据目录 <code>/usr/share/luci/menu.d/</code> 下的内容产生节点树，然后由带进来的 request 找到对应的节点，根据 <code>action.type</code> 再作相应的处理，将请求的页面返回给客户端浏览器。</p>
 <p>由于 action.type 为 view 和 firstchild 的情形比较典型，所以这里只分析这两种的处理过程。理解了这两种，其他的也就很容易看懂了。</p>
-<h3 id="action-dot-type-view">action.type == view</h3>
+<h4 id="action-dot-type-view">action.type == view</h4>
 <p>先来看看 <code>action.type == view</code> 的情况 。比如访问路径为
 <code>http://192.168.1.111/cgi-bin/luci/admin/system</code> ，在文件
 <code>/usr/share/luci/menu.d/luci-mod-system.json</code> 中定义的路径如下:</p>
@@ -761,7 +764,7 @@ tpl.render 也就对应了文件 template.lua 中的 render 函数。</p>
 </code></pre></td></tr></table>
 </div>
 </div><p>然后在对应的 menu-xxx.js 文件中加入 render 的代码即可。</p>
-<h3 id="action-dot-type-firstchild">action.type == firstchild</h3>
+<h4 id="action-dot-type-firstchild">action.type == firstchild</h4>
 <p>再来看 firstchild 。就以上面的 System-&gt;Administrator 为例。可以看到如下的调试信息</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -941,6 +944,19 @@ tpl.render 也就对应了文件 template.lua 中的 render 函数。</p>
 </code></pre></td></tr></table>
 </div>
 </div><p>可以看到其实就是找到第一个子节点，然后进行显示。</p>
+<h3 id="页面设置">页面设置</h3>
+<p>显示的部分清楚了，那么设置呢？如果我们在页面上修改了一些参数，点击 Save 或者
+Save &amp; Apply 按钮，又发生了些什么？</p>
+<p>一句话概括就是：luci 通过 ubus 调用 rpcd 的 uci commit，然后 rpcd 发出 ubus 的
+config.change event。</p>
+<p>当点击按钮 Apply unchecked 或者 Save &amp; Apply 的时候，浏览器会发送
+action_apply_unchecked 或者 action_apply_rollback 的 request 给服务器。根据
+/usr/share/luci/menu.d/luci-base.json 的配置，会调用
+/usr/lib/lua/luci/controller/admin/uci.lua 中的函数 <a href="https://github.com/openwrt/luci/blob/master/modules/luci-base/luasrc/controller/admin/uci.lua#L43" target="_blank" rel="noopener noreffer">action_apply_unchecked</a> 或者函数 <a href="https://github.com/openwrt/luci/blob/master/modules/luci-base/luasrc/controller/admin/uci.lua#L32" target="_blank" rel="noopener noreffer">action_apply_rollback</a> ，之后会调用 /usr/lib/lua/luci/model/uci.lua 中的
+<a href="https://github.com/openwrt/luci/blob/master/modules/luci-base/luasrc/model/uci.lua#L120" target="_blank" rel="noopener noreffer">apply</a> 函数。该函数会调用 &lsquo;ubus call uci apply&rsquo;，从而转到 rpcd。</p>
+<p>接下来就会调用到 rpcd/uci.c 中的函数 <a href="https://lxr.openwrt.org/source/rpcd/uci.c#L1566" target="_blank" rel="noopener noreffer">rpc_uci_apply</a> ，调用 <a href="https://lxr.openwrt.org/source/rpcd/uci.c#L1444" target="_blank" rel="noopener noreffer">rpc_uci_apply_config</a>
+，最终执行了函数 <a href="https://lxr.openwrt.org/source/rpcd/uci.c#L1304" target="_blank" rel="noopener noreffer">rpc_uci_trigger_event</a> ，为每个提交的配置发出对应的 ubus 的
+config.change 事件。</p>
 <h2 id="faq">FAQ</h2>
 <h3 id="什么是-cbi">什么是 CBI ?</h3>
 <p>CBI 是 Configuration Bind Interface 的缩写。在 <a href="https://gitlab.nic.cz/turris/luci-cs/blob/a3bebe925cdefa56a1671d0919d797ef230cadd5/libs/cbi/luasrc/cbi.lua" target="_blank" rel="noopener noreffer">老的源码</a> 中有以下说明</p>
@@ -965,24 +981,9 @@ types. Supports value and range validation and basic dependencies.
 <h3 id="有哪些相关的目录">有哪些相关的目录？</h3>
 <p>从 openwrt 开发板的角度来看，有以下的相关目录或文件</p>
 <ul>
-<li>
-<p>/usr/share/luci/menu.d 存放菜单配置</p>
-</li>
-<li>
-<p>/www</p>
+<li>/usr/share/luci/menu.d 存放菜单配置
 <ul>
-<li>luci-static/resources/view 存放页面对应的 js 文件</li>
-</ul>
-</li>
-<li>
-<p>/usr/lib/lua/luci</p>
-<ul>
-<li>/usr/lib/lua/luci/model 动态获取数据的 lua 脚本</li>
-<li>/usr/lib/lua/luci/view htm 格式的静态网页文件</li>
-</ul>
-</li>
-<li>
-<p>/usr/share/luci/menu.d/luci-base.json</p>
+<li>/usr/share/luci/menu.d/luci-base.json
 <ul>
 <li>[admin/status, type: firstchild]
 <ul>
@@ -1002,6 +1003,19 @@ types. Supports value and range validation and basic dependencies.
 </li>
 </ul>
 </li>
+</ul>
+</li>
+</ul>
+</li>
+<li>/www
+<ul>
+<li>luci-static/resources/view 存放页面对应的 js 文件</li>
+</ul>
+</li>
+<li>/usr/lib/lua/luci
+<ul>
+<li>/usr/lib/lua/luci/model 动态获取数据的 lua 脚本</li>
+<li>/usr/lib/lua/luci/view htm 格式的静态网页文件</li>
 </ul>
 </li>
 </ul>
@@ -1270,12 +1284,13 @@ uci commit luci
 <li><a href="https://github.com/openwrt/luci/commit/9ae591b38fedf16c3e5c97350b7182c5e28ed71f#diff-27855472049b664538cca7ef50c43df8" target="_blank" rel="noopener noreffer">Example to convert lua to js</a></li>
 <li><a href="https://github.com/openwrt/luci/wiki/DevelopmentEnvironmentHowTo" target="_blank" rel="noopener noreffer">HowTo: Setting up a Development Environment</a></li>
 <li><a href="https://icode.best/i/39853430929644" target="_blank" rel="noopener noreffer">LuCI入门</a>  <a href="https://icode.best/i/47766730937809%20" target="_blank" rel="noopener noreffer">LuCI之CBI</a>  <a href="https://icode.best/i/71684130952721%20%20" target="_blank" rel="noopener noreffer">LuCI之UCI</a></li>
+<li><a href="https://iyzm.net/openwrt/624.html" target="_blank" rel="noopener noreffer">OpenWrt达人教程之开发人员入门指南</a></li>
 </ul>
 </div><div class="post-footer" id="post-footer">
     <div class="post-info">
         <div class="post-info-line">
             <div class="post-info-mod">
-                <span>更新于 2022-08-05</span>
+                <span>更新于 2022-10-19</span>
             </div>
             <div class="post-info-license"></div>
         </div>
