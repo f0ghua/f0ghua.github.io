@@ -10,7 +10,7 @@
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://f0ghua.github.io/openwrt-luci/" /><meta property="og:image" content="https://f0ghua.github.io/logo.png"/><meta property="article:section" content="posts" />
 <meta property="article:published_time" content="2022-08-04T17:51:00+08:00" />
-<meta property="article:modified_time" content="2023-02-03T11:21:16+08:00" />
+<meta property="article:modified_time" content="2023-02-03T11:30:38+08:00" />
 
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:image" content="https://f0ghua.github.io/logo.png"/>
@@ -29,8 +29,8 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "https:\/\/f0ghua.github.io\/openwrt-luci\/"
-        },"image": ["https:\/\/f0ghua.github.io\/images\/Apple-Devices-Preview.png"],"genre": "posts","wordcount":  4041 ,
-        "url": "https:\/\/f0ghua.github.io\/openwrt-luci\/","datePublished": "2022-08-04T17:51:00+08:00","dateModified": "2023-02-03T11:21:16+08:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
+        },"image": ["https:\/\/f0ghua.github.io\/images\/Apple-Devices-Preview.png"],"genre": "posts","wordcount":  4060 ,
+        "url": "https:\/\/f0ghua.github.io\/openwrt-luci\/","datePublished": "2022-08-04T17:51:00+08:00","dateModified": "2023-02-03T11:30:38+08:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
             "@type": "Organization",
             "name": "xxxx","logo": "https:\/\/f0ghua.github.io\/images\/avatar.png"},"author": {
                 "@type": "Person",
@@ -110,7 +110,7 @@
             <div class="toc-content" id="toc-content-auto"></div>
         </div><article class="page single"><h1 class="single-title animated flipInX">openwrt LUCI工作原理浅析</h1><div class="post-meta">
             <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>fog</a></span></div>
-            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-08-04">2022-08-04</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 4041 字&nbsp;
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-08-04">2022-08-04</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 4060 字&nbsp;
                 <i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 9 分钟&nbsp;</div>
         </div><div class="details toc" id="toc-static"  kept="">
                 <div class="details-summary toc-title">
@@ -975,12 +975,11 @@ Save &amp; Apply 按钮，又发生了些什么？</p>
 <p>一句话概括就是：luci 通过 ubus 调用 rpcd 的 uci commit，然后 rpcd 发出 ubus 的
 config.change event。</p>
 <p>当点击按钮 Apply unchecked 或者 Save &amp; Apply 的时候，浏览器会发送
-action_apply_unchecked 或者 action_apply_rollback 的 request 给服务器。根据
-/usr/share/luci/menu.d/luci-base.json 的配置，会调用
-/usr/lib/lua/luci/controller/admin/uci.lua 中的函数 <a href="https://github.com/openwrt/luci/blob/openwrt-19.07/modules/luci-base/luasrc/controller/admin/uci.lua#L43" target="_blank" rel="noopener noreffer">action_apply_unchecked</a> 或者函数 <a href="https://github.com/openwrt/luci/blob/openwrt-19.07/modules/luci-base/luasrc/controller/admin/uci.lua#L32" target="_blank" rel="noopener noreffer">action_apply_rollback</a> ，之后会调用 /usr/lib/lua/luci/model/uci.lua 中的
+<code>action_apply_unchecked</code> 或者 <code>action_apply_rollback</code> 的 request 给服务器。根据
+<code>/usr/share/luci/menu.d/luci-base.json</code> 的配置，会调用
+<code>/usr/lib/lua/luci/controller/admin/uci.lua</code> 中的函数 <a href="https://github.com/openwrt/luci/blob/openwrt-19.07/modules/luci-base/luasrc/controller/admin/uci.lua#L43" target="_blank" rel="noopener noreffer">action_apply_unchecked</a> 或者函数 <a href="https://github.com/openwrt/luci/blob/openwrt-19.07/modules/luci-base/luasrc/controller/admin/uci.lua#L32" target="_blank" rel="noopener noreffer">action_apply_rollback</a> ，之后会调用 <code>/usr/lib/lua/luci/model/uci.lua</code> 中的
 <a href="https://github.com/openwrt/luci/blob/openwrt-19.07/modules/luci-base/luasrc/model/uci.lua#L120" target="_blank" rel="noopener noreffer">apply</a> 函数。该函数会调用 &lsquo;ubus call uci apply&rsquo;，从而转到 rpcd。</p>
-<p>接下来就会调用到 rpcd/uci.c 中的函数 <a href="https://lxr.openwrt.org/source/rpcd/uci.c#L1566" target="_blank" rel="noopener noreffer">rpc_uci_apply</a> ，调用 <a href="https://lxr.openwrt.org/source/rpcd/uci.c#L1444" target="_blank" rel="noopener noreffer">rpc_uci_apply_config</a>
-，最终执行了函数 <a href="https://lxr.openwrt.org/source/rpcd/uci.c#L1304" target="_blank" rel="noopener noreffer">rpc_uci_trigger_event</a> ，为每个提交的配置发出对应的 ubus 的
+<p>接下来就会调用到 <code>rpcd/uci.c</code> 中的函数 <a href="https://lxr.openwrt.org/source/rpcd/uci.c#L1566" target="_blank" rel="noopener noreffer">rpc_uci_apply</a> ，调用 <a href="https://lxr.openwrt.org/source/rpcd/uci.c#L1444" target="_blank" rel="noopener noreffer">rpc_uci_apply_config</a>，最终执行了函数 <a href="https://lxr.openwrt.org/source/rpcd/uci.c#L1304" target="_blank" rel="noopener noreffer">rpc_uci_trigger_event</a> ，为每个提交的配置发出对应的 ubus 的
 config.change 事件。</p>
 <p>以 firewall 为例。在 <code>/etc/init.d/firewall</code> 脚本中，在系统启动时，通过
 <code>procd_add_reload_trigger firewall</code> 由 procd 向 ubus 注册 config.change event。一旦 ubus 收到 config.change 事件，将触发 <code>/etc/init.d/firewall reload</code></p>

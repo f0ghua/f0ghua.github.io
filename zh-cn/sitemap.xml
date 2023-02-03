@@ -2,7 +2,7 @@
     xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
     xmlns:xhtml="http://www.w3.org/1999/xhtml"
     ><url>
-            <loc>https://f0ghua.github.io/</loc><lastmod>2023-02-03T11:21:16&#43;08:00</lastmod><changefreq>weekly</changefreq><priority>1</priority><xhtml:link
+            <loc>https://f0ghua.github.io/</loc><lastmod>2023-02-03T11:30:38&#43;08:00</lastmod><changefreq>weekly</changefreq><priority>1</priority><xhtml:link
                         rel="alternate"
                         hreflang="en"
                         href="https://f0ghua.github.io/en/"
@@ -11,8 +11,8 @@
                     hreflang="zh-cn"
                     href="https://f0ghua.github.io/"
                     /></url><url>
-            <loc>https://f0ghua.github.io/openwrt-luci/</loc><lastmod>2023-02-03T11:21:16&#43;08:00</lastmod><changefreq>weekly</changefreq><priority>1</priority></url><url>
-            <loc>https://f0ghua.github.io/posts/</loc><lastmod>2023-02-03T11:21:16&#43;08:00</lastmod><changefreq>weekly</changefreq><priority>1</priority></url><url>
+            <loc>https://f0ghua.github.io/openwrt-luci/</loc><lastmod>2023-02-03T11:30:38&#43;08:00</lastmod><changefreq>weekly</changefreq><priority>1</priority></url><url>
+            <loc>https://f0ghua.github.io/posts/</loc><lastmod>2023-02-03T11:30:38&#43;08:00</lastmod><changefreq>weekly</changefreq><priority>1</priority></url><url>
             <loc>https://f0ghua.github.io/tags/kernel/</loc><lastmod>2022-08-02T10:17:10&#43;08:00</lastmod><changefreq>weekly</changefreq><priority>0.5</priority></url><url>
             <loc>https://f0ghua.github.io/tags/</loc><lastmod>2022-08-02T10:17:10&#43;08:00</lastmod><changefreq>weekly</changefreq><priority>0.5</priority><xhtml:link
                         rel="alternate"
