@@ -9,7 +9,7 @@
     <pubDate>Thu, 04 Aug 2022 17:51:00 &#43;0800</pubDate>
     <author>作者</author>
     <guid>https://f0ghua.github.io/openwrt-luci/</guid>
-    <description><![CDATA[LUCI 的工作原理 首先说明，这里分析的版本为 openwrt-21.02.3 LUCI 可以理解为 lua + UCI 。是用 lua 实现的读写 UCI 配置的一个框架。这个框架配合 uhttpd 可以实现简单快速的页面开发和访问]]></description>
+    <description><![CDATA[LUCI 安装 1 2 3 $ ./scripts/feeds update packages luci $ ./scripts/feeds install -a -p luci $ make menuconfig LUCI Collections luci LUCI 的工作原理 首先说明，这里分析的版本为 openwrt-21.02.3 LUCI 可以理解为 lua + UCI 。是用 lua 实现的读写 UCI 配置的一个框架。]]></description>
 </item><item>
     <title>内核空间和用户空间通信 - proc 虚拟文件系统</title>
     <link>https://f0ghua.github.io/linux_proc/</link>
