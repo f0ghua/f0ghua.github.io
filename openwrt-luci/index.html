@@ -10,7 +10,7 @@
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://f0ghua.github.io/openwrt-luci/" /><meta property="og:image" content="https://f0ghua.github.io/logo.png"/><meta property="article:section" content="posts" />
 <meta property="article:published_time" content="2022-08-04T17:51:00+08:00" />
-<meta property="article:modified_time" content="2023-02-03T11:30:38+08:00" />
+<meta property="article:modified_time" content="2023-06-08T21:44:19+08:00" />
 
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:image" content="https://f0ghua.github.io/logo.png"/>
@@ -29,8 +29,8 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "https:\/\/f0ghua.github.io\/openwrt-luci\/"
-        },"image": ["https:\/\/f0ghua.github.io\/images\/Apple-Devices-Preview.png"],"genre": "posts","wordcount":  4060 ,
-        "url": "https:\/\/f0ghua.github.io\/openwrt-luci\/","datePublished": "2022-08-04T17:51:00+08:00","dateModified": "2023-02-03T11:30:38+08:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
+        },"image": ["https:\/\/f0ghua.github.io\/images\/Apple-Devices-Preview.png"],"genre": "posts","wordcount":  6726 ,
+        "url": "https:\/\/f0ghua.github.io\/openwrt-luci\/","datePublished": "2022-08-04T17:51:00+08:00","dateModified": "2023-06-08T21:44:19+08:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
             "@type": "Organization",
             "name": "xxxx","logo": "https:\/\/f0ghua.github.io\/images\/avatar.png"},"author": {
                 "@type": "Person",
@@ -110,8 +110,8 @@
             <div class="toc-content" id="toc-content-auto"></div>
         </div><article class="page single"><h1 class="single-title animated flipInX">openwrt LUCI工作原理浅析</h1><div class="post-meta">
             <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>fog</a></span></div>
-            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-08-04">2022-08-04</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 4060 字&nbsp;
-                <i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 9 分钟&nbsp;</div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-08-04">2022-08-04</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 6726 字&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 14 分钟&nbsp;</div>
         </div><div class="details toc" id="toc-static"  kept="">
                 <div class="details-summary toc-title">
                     <span>目录</span>
@@ -125,11 +125,23 @@
         <li><a href="#页面显示">页面显示</a>
           <ul>
             <li><a href="#action-dot-type-view">action.type == view</a></li>
+            <li><a href="#生成菜单">生成菜单</a></li>
             <li><a href="#显示菜单">显示菜单</a></li>
             <li><a href="#action-dot-type-firstchild">action.type == firstchild</a></li>
           </ul>
         </li>
         <li><a href="#页面设置">页面设置</a></li>
+      </ul>
+    </li>
+    <li><a href="#luci-页面编写">LUCI 页面编写</a>
+      <ul>
+        <li><a href="#e-是什么"><code>E()</code> 是什么？</a></li>
+        <li><a href="#templates">Templates</a></li>
+      </ul>
+    </li>
+    <li><a href="#menu-dot-d">menu.d</a>
+      <ul>
+        <li><a href="#depends">depends</a></li>
       </ul>
     </li>
     <li><a href="#faq">FAQ</a>
@@ -139,6 +151,7 @@
         <li><a href="#有哪些相关的目录">有哪些相关的目录？</a></li>
         <li><a href="#luci-的-theme-是怎么应用的">LUCI 的 theme 是怎么应用的？</a></li>
         <li><a href="#修改后如何更新">修改后如何更新？</a></li>
+        <li><a href="#如何实时的显示或隐藏菜单项">如何实时的显示或隐藏菜单项？</a></li>
       </ul>
     </li>
     <li><a href="#调试">调试</a></li>
@@ -652,6 +665,411 @@ tpl.render 也就对应了文件 template.lua 中的 render 函数。</p>
 </div>
 </div><p>这些内容会被服务器返回给浏览器客户端。然后浏览器客户端会调用其中嵌入的 js 脚本，执行脚本中的函数（来源于 luci.js）从服务器端获取需要的数据（通过 json 封装），完成最终的绘制。</p>
 <p>在早期的 luci 版本中绘制的工作是在服务器端通过 lua 脚本进行的；而现在这个绘制的工作则通过使用 js 的方式转移到了客户端浏览器来进行。</p>
+<h4 id="生成菜单">生成菜单</h4>
+<p>页面上的菜单是怎么来的？如果我要添加一个新的 luci application，怎么加入现有的菜单？</p>
+<p>这一节我们就来讨论这个问题。</p>
+<p>在 dispatch 函数刚刚进入就有如下的语句</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-lua" data-lang="lua"><span class="kd">local</span> <span class="n">menu</span> <span class="o">=</span> <span class="n">menu_json</span><span class="p">()</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>menu_json 的源码如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-lua" data-lang="lua"><span class="kr">function</span> <span class="nf">menu_json</span><span class="p">(</span><span class="n">acl</span><span class="p">)</span>
+	<span class="kd">local</span> <span class="n">tree</span> <span class="o">=</span> <span class="n">context.tree</span> <span class="ow">or</span> <span class="n">createtree</span><span class="p">()</span>
+	<span class="kd">local</span> <span class="n">json_tree</span> <span class="o">=</span> <span class="n">createtree_json</span><span class="p">()</span>
+	<span class="kd">local</span> <span class="n">menu_tree</span> <span class="o">=</span> <span class="n">merge_trees</span><span class="p">(</span><span class="n">lua_tree</span><span class="p">,</span> <span class="n">json_tree</span><span class="p">)</span>
+
+	<span class="kr">return</span> <span class="n">menu_tree</span>
+<span class="kr">end</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>我这里把无关菜单生成的部分去掉了。所以可以很清楚的看到生成菜单分为 2 部分。</p>
+<ul>
+<li>第一部分是函数 <code>createtree()</code> 干的活，主要是运行 controller 下面的各个 lua 文件的
+index 函数，生成菜单</li>
+<li>第二部分是函数 <code>createtree_json()</code> 做的事，主要是分析 menu.d 目录下各个 json
+文件，生成菜单</li>
+<li>最后再通过函数 <code>merge_trees()</code> 把两者整合起来，形成最终的菜单</li>
+</ul>
+<!--list-separator-->
+<ul>
+<li>
+<p>使用 lua 文件添加菜单</p>
+<p>知道大体流程了，我们先来看 <code>createtree</code> ，可以看到函数调用关系如下</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">- menu_json
+  - createtree
+    - createindex
+</code></pre></td></tr></table>
+</div>
+</div><p>createindex 函数的主要内容如下</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-lua" data-lang="lua"><span class="kr">function</span> <span class="nf">createindex</span><span class="p">()</span>
+	<span class="kd">local</span> <span class="n">controllers</span> <span class="o">=</span> <span class="p">{</span> <span class="p">}</span>
+	<span class="kd">local</span> <span class="n">base</span> <span class="o">=</span> <span class="s2">&#34;%s/controller/&#34;</span> <span class="o">%</span> <span class="n">util.libpath</span><span class="p">()</span>
+	<span class="kd">local</span> <span class="n">_</span><span class="p">,</span> <span class="n">path</span>
+
+	<span class="kr">for</span> <span class="n">path</span> <span class="kr">in</span> <span class="p">(</span><span class="n">fs.glob</span><span class="p">(</span><span class="s2">&#34;%s*.lua&#34;</span> <span class="o">%</span> <span class="n">base</span><span class="p">)</span> <span class="ow">or</span> <span class="kr">function</span><span class="p">()</span> <span class="kr">end</span><span class="p">)</span> <span class="kr">do</span>
+		<span class="n">controllers</span><span class="p">[</span><span class="o">#</span><span class="n">controllers</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">path</span>
+	<span class="kr">end</span>
+
+	<span class="kr">for</span> <span class="n">path</span> <span class="kr">in</span> <span class="p">(</span><span class="n">fs.glob</span><span class="p">(</span><span class="s2">&#34;%s*/*.lua&#34;</span> <span class="o">%</span> <span class="n">base</span><span class="p">)</span> <span class="ow">or</span> <span class="kr">function</span><span class="p">()</span> <span class="kr">end</span><span class="p">)</span> <span class="kr">do</span>
+		<span class="n">controllers</span><span class="p">[</span><span class="o">#</span><span class="n">controllers</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">path</span>
+	<span class="kr">end</span>
+
+	<span class="n">index</span> <span class="o">=</span> <span class="p">{}</span>
+
+	<span class="kr">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">path</span> <span class="kr">in</span> <span class="n">ipairs</span><span class="p">(</span><span class="n">controllers</span><span class="p">)</span> <span class="kr">do</span>
+		<span class="kd">local</span> <span class="n">modname</span> <span class="o">=</span> <span class="s2">&#34;luci.controller.&#34;</span> <span class="o">..</span> <span class="n">path</span><span class="p">:</span><span class="n">sub</span><span class="p">(</span><span class="o">#</span><span class="n">base</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="o">#</span><span class="n">path</span><span class="o">-</span><span class="mi">4</span><span class="p">):</span><span class="n">gsub</span><span class="p">(</span><span class="s2">&#34;/&#34;</span><span class="p">,</span> <span class="s2">&#34;.&#34;</span><span class="p">)</span>
+		<span class="kd">local</span> <span class="n">mod</span> <span class="o">=</span> <span class="n">require</span><span class="p">(</span><span class="n">modname</span><span class="p">)</span>
+		<span class="n">assert</span><span class="p">(</span><span class="n">mod</span> <span class="o">~=</span> <span class="kc">true</span><span class="p">,</span>
+		       <span class="s2">&#34;Invalid controller file found</span><span class="se">\n</span><span class="s2">&#34;</span> <span class="o">..</span>
+		       <span class="s2">&#34;The file &#39;&#34;</span> <span class="o">..</span> <span class="n">path</span> <span class="o">..</span> <span class="s2">&#34;&#39; contains an invalid module line.</span><span class="se">\n</span><span class="s2">&#34;</span> <span class="o">..</span>
+		       <span class="s2">&#34;Please verify whether the module name is set to &#39;&#34;</span> <span class="o">..</span> <span class="n">modname</span> <span class="o">..</span>
+		       <span class="s2">&#34;&#39; - It must correspond to the file path!&#34;</span><span class="p">)</span>
+
+		<span class="kd">local</span> <span class="n">idx</span> <span class="o">=</span> <span class="n">mod.index</span>
+		<span class="kr">if</span> <span class="n">type</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&#34;function&#34;</span> <span class="kr">then</span>
+			<span class="n">index</span><span class="p">[</span><span class="n">modname</span><span class="p">]</span> <span class="o">=</span> <span class="n">idx</span>
+		<span class="kr">end</span>
+	<span class="kr">end</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>可以看到，该函数会遍历 <code>/usr/lib/lua/luci/controller/</code> 目录和其第一层子目录中所有 lua 文件，然后读取其中的 <code>index()</code> 函数，放在全局变量 index table 中。也就是说该函数执行完后，全局变量 index 中存放了所有的 controller 的 index 函数列表。</p>
+<p>再来看看 <code>createtree()</code> 函数</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-lua" data-lang="lua"><span class="kr">function</span> <span class="nf">createtree</span><span class="p">()</span>
+    <span class="c1">-- ...</span>
+	<span class="kr">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="kr">in</span> <span class="n">pairs</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="kr">do</span>
+		<span class="n">scope._NAME</span> <span class="o">=</span> <span class="n">k</span>
+		<span class="n">setfenv</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">scope</span><span class="p">)</span>
+		<span class="n">v</span><span class="p">()</span>
+	<span class="kr">end</span>
+
+	<span class="kr">return</span> <span class="n">tree</span>
+<span class="kr">end</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>这个函数很简单，我们只看最关键的部分，就是遍历 index table，执行其中保存的各个
+<code>index()</code> 函数。</p>
+<p>而事实上，添加菜单的工作都是由这个 <code>index()</code> 函数来完成的。</p>
+<p>举个例子，例子来源于 luci-app-lxc，源码的文件 <code>luasrc/controller/lxc.lua</code> 内容如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-lua" data-lang="lua"><span class="kr">function</span> <span class="nf">index</span><span class="p">()</span>
+	<span class="kr">if</span> <span class="ow">not</span> <span class="n">nixio.fs</span><span class="p">.</span><span class="n">access</span><span class="p">(</span><span class="s2">&#34;/etc/config/lxc&#34;</span><span class="p">)</span> <span class="kr">then</span>
+		<span class="kr">return</span>
+	<span class="kr">end</span>
+
+	<span class="n">page</span> <span class="o">=</span> <span class="n">node</span><span class="p">(</span><span class="s2">&#34;admin&#34;</span><span class="p">,</span> <span class="s2">&#34;services&#34;</span><span class="p">,</span> <span class="s2">&#34;lxc&#34;</span><span class="p">)</span>
+	<span class="n">page.target</span> <span class="o">=</span> <span class="n">cbi</span><span class="p">(</span><span class="s2">&#34;lxc&#34;</span><span class="p">)</span>
+	<span class="n">page.title</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&#34;LXC Containers&#34;</span><span class="p">)</span>
+	<span class="n">page.order</span> <span class="o">=</span> <span class="mi">70</span>
+	<span class="n">page.acl_depends</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&#34;luci-app-lxc&#34;</span> <span class="p">}</span>
+
+	<span class="n">page</span> <span class="o">=</span> <span class="n">entry</span><span class="p">({</span><span class="s2">&#34;admin&#34;</span><span class="p">,</span> <span class="s2">&#34;services&#34;</span><span class="p">,</span> <span class="s2">&#34;lxc_create&#34;</span><span class="p">},</span> <span class="n">call</span><span class="p">(</span><span class="s2">&#34;lxc_create&#34;</span><span class="p">),</span> <span class="kc">nil</span><span class="p">)</span>
+	<span class="n">page.acl_depends</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&#34;luci-app-lxc&#34;</span> <span class="p">}</span>
+	<span class="n">page.leaf</span> <span class="o">=</span> <span class="kc">true</span>
+
+	<span class="n">page</span> <span class="o">=</span> <span class="n">entry</span><span class="p">({</span><span class="s2">&#34;admin&#34;</span><span class="p">,</span> <span class="s2">&#34;services&#34;</span><span class="p">,</span> <span class="s2">&#34;lxc_action&#34;</span><span class="p">},</span> <span class="n">call</span><span class="p">(</span><span class="s2">&#34;lxc_action&#34;</span><span class="p">),</span> <span class="kc">nil</span><span class="p">)</span>
+	<span class="n">page.acl_depends</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&#34;luci-app-lxc&#34;</span> <span class="p">}</span>
+	<span class="n">page.leaf</span> <span class="o">=</span> <span class="kc">true</span>
+
+	<span class="n">page</span> <span class="o">=</span> <span class="n">entry</span><span class="p">({</span><span class="s2">&#34;admin&#34;</span><span class="p">,</span> <span class="s2">&#34;services&#34;</span><span class="p">,</span> <span class="s2">&#34;lxc_get_downloadable&#34;</span><span class="p">},</span> <span class="n">call</span><span class="p">(</span><span class="s2">&#34;lxc_get_downloadable&#34;</span><span class="p">),</span> <span class="kc">nil</span><span class="p">)</span>
+	<span class="n">page.acl_depends</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&#34;luci-app-lxc&#34;</span> <span class="p">}</span>
+	<span class="n">page.leaf</span> <span class="o">=</span> <span class="kc">true</span>
+
+	<span class="n">page</span> <span class="o">=</span> <span class="n">entry</span><span class="p">({</span><span class="s2">&#34;admin&#34;</span><span class="p">,</span> <span class="s2">&#34;services&#34;</span><span class="p">,</span> <span class="s2">&#34;lxc_configuration_get&#34;</span><span class="p">},</span> <span class="n">call</span><span class="p">(</span><span class="s2">&#34;lxc_configuration_get&#34;</span><span class="p">),</span> <span class="kc">nil</span><span class="p">)</span>
+	<span class="n">page.acl_depends</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&#34;luci-app-lxc&#34;</span> <span class="p">}</span>
+	<span class="n">page.leaf</span> <span class="o">=</span> <span class="kc">true</span>
+
+	<span class="n">page</span> <span class="o">=</span> <span class="n">entry</span><span class="p">({</span><span class="s2">&#34;admin&#34;</span><span class="p">,</span> <span class="s2">&#34;services&#34;</span><span class="p">,</span> <span class="s2">&#34;lxc_configuration_set&#34;</span><span class="p">},</span> <span class="n">call</span><span class="p">(</span><span class="s2">&#34;lxc_configuration_set&#34;</span><span class="p">),</span> <span class="kc">nil</span><span class="p">)</span>
+	<span class="n">page.acl_depends</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&#34;luci-app-lxc&#34;</span> <span class="p">}</span>
+	<span class="n">page.leaf</span> <span class="o">=</span> <span class="kc">true</span>
+<span class="kr">end</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>其中函数 node 来自于 dispatcher.lua</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-lua" data-lang="lua"><span class="kr">function</span> <span class="nf">node</span><span class="p">(...)</span>
+	<span class="kd">local</span> <span class="n">c</span> <span class="o">=</span> <span class="n">_create_node</span><span class="p">({...})</span>
+
+	<span class="n">c.module</span> <span class="o">=</span> <span class="n">getfenv</span><span class="p">(</span><span class="mi">2</span><span class="p">).</span><span class="n">_NAME</span>
+	<span class="n">c.auto</span> <span class="o">=</span> <span class="kc">nil</span>
+
+	<span class="kr">return</span> <span class="n">c</span>
+<span class="kr">end</span>
+
+<span class="kr">function</span> <span class="nf">_create_node</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+	<span class="kr">if</span> <span class="o">#</span><span class="n">path</span> <span class="o">==</span> <span class="mi">0</span> <span class="kr">then</span>
+		<span class="kr">return</span> <span class="n">context.tree</span>
+	<span class="kr">end</span>
+	<span class="c1">-- name = admin.srevices.lxc</span>
+	<span class="kd">local</span> <span class="n">name</span> <span class="o">=</span> <span class="n">table.concat</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&#34;.&#34;</span><span class="p">)</span>
+	<span class="kd">local</span> <span class="n">c</span> <span class="o">=</span> <span class="n">context.treecache</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+
+	<span class="kr">if</span> <span class="ow">not</span> <span class="n">c</span> <span class="kr">then</span>
+		<span class="kd">local</span> <span class="n">last</span> <span class="o">=</span> <span class="n">table.remove</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+		<span class="kd">local</span> <span class="n">parent</span> <span class="o">=</span> <span class="n">_create_node</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+		<span class="n">c</span> <span class="o">=</span> <span class="p">{</span><span class="n">nodes</span><span class="o">=</span><span class="p">{},</span> <span class="n">auto</span><span class="o">=</span><span class="kc">true</span><span class="p">,</span> <span class="n">inreq</span><span class="o">=</span><span class="kc">true</span><span class="p">}</span>
+
+		<span class="n">parent.nodes</span><span class="p">[</span><span class="n">last</span><span class="p">]</span> <span class="o">=</span> <span class="n">c</span>
+		<span class="n">context.treecache</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">c</span>
+	<span class="kr">end</span>
+
+	<span class="kr">return</span> <span class="n">c</span>
+<span class="kr">end</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>函数 cbi 和 entry 也来自于 dispatcher.lua</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-lua" data-lang="lua"><span class="kr">function</span> <span class="nf">cbi</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+	<span class="kr">return</span> <span class="p">{</span>
+		<span class="n">type</span> <span class="o">=</span> <span class="s2">&#34;cbi&#34;</span><span class="p">,</span>
+		<span class="n">post</span> <span class="o">=</span> <span class="p">{</span> <span class="p">[</span><span class="s2">&#34;cbi.submit&#34;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">true</span> <span class="p">},</span>
+		<span class="n">config</span> <span class="o">=</span> <span class="n">config</span><span class="p">,</span>
+		<span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+	<span class="p">}</span>
+<span class="kr">end</span>
+
+<span class="kr">function</span> <span class="nf">entry</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">order</span><span class="p">)</span>
+	<span class="kd">local</span> <span class="n">c</span> <span class="o">=</span> <span class="n">node</span><span class="p">(</span><span class="n">unpack</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+
+	<span class="n">c.target</span> <span class="o">=</span> <span class="n">target</span>
+	<span class="n">c.title</span>  <span class="o">=</span> <span class="n">title</span>
+	<span class="n">c.order</span>  <span class="o">=</span> <span class="n">order</span>
+	<span class="n">c.module</span> <span class="o">=</span> <span class="n">getfenv</span><span class="p">(</span><span class="mi">2</span><span class="p">).</span><span class="n">_NAME</span>
+
+	<span class="kr">return</span> <span class="n">c</span>
+<span class="kr">end</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>是不是奇怪为什么 entry 返回值没有什么处理就结束了？关键在于 <code>_create_node</code> 函数，这个函数把新创建的 node 直接挂到了全局变量 context.treecache table 里面去了。所以对于 entry 返回的 node 节点就不需要再保存了，后面的处理都只是在给 node 里面的成员赋值。</p>
+<p>通过以上分析可以知道，entry 函数调用就可以添加一个 uri。</p>
+<p>比如</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-lua" data-lang="lua"><span class="n">entry</span><span class="p">({</span><span class="s2">&#34;admin&#34;</span><span class="p">,</span> <span class="s2">&#34;services&#34;</span><span class="p">,</span> <span class="s2">&#34;lxc_create&#34;</span><span class="p">},</span> <span class="n">call</span><span class="p">(</span><span class="s2">&#34;lxc_create&#34;</span><span class="p">),</span> <span class="kc">nil</span><span class="p">)</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>就会创建 uri admin/services/lxc_create，对应的操作为 call lxc_create</p>
+<p>而代码</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-lua" data-lang="lua">	<span class="n">page</span> <span class="o">=</span> <span class="n">node</span><span class="p">(</span><span class="s2">&#34;admin&#34;</span><span class="p">,</span> <span class="s2">&#34;services&#34;</span><span class="p">,</span> <span class="s2">&#34;lxc&#34;</span><span class="p">)</span>
+	<span class="n">page.target</span> <span class="o">=</span> <span class="n">cbi</span><span class="p">(</span><span class="s2">&#34;lxc&#34;</span><span class="p">)</span>
+	<span class="n">page.title</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&#34;LXC Containers&#34;</span><span class="p">)</span>
+	<span class="n">page.order</span> <span class="o">=</span> <span class="mi">70</span>
+	<span class="n">page.acl_depends</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&#34;luci-app-lxc&#34;</span> <span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>则是创建一个 uri admin/services/lxc ，访问此页面，则会调用 model/cbi/lxc.lua 脚本，绘制页面。</p>
+</li>
+</ul>
+<!--list-separator-->
+<ul>
+<li>
+<p>使用 json 文件添加菜单</p>
+<p>这个就比较简单了，只需要在 menu.d 目录下添加对应的 json 文件即可。拿
+<code>luci-app-ddns</code> 举例</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="p">{</span>
+	<span class="nt">&#34;admin/services/ddns&#34;</span><span class="p">:</span> <span class="p">{</span>
+		<span class="nt">&#34;title&#34;</span><span class="p">:</span> <span class="s2">&#34;Dynamic DNS&#34;</span><span class="p">,</span>
+		<span class="nt">&#34;order&#34;</span><span class="p">:</span> <span class="mi">59</span><span class="p">,</span>
+		<span class="nt">&#34;action&#34;</span><span class="p">:</span> <span class="p">{</span>
+			<span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;view&#34;</span><span class="p">,</span>
+			<span class="nt">&#34;path&#34;</span><span class="p">:</span> <span class="s2">&#34;ddns/overview&#34;</span>
+		<span class="p">},</span>
+		<span class="nt">&#34;depends&#34;</span><span class="p">:</span> <span class="p">{</span>
+			<span class="nt">&#34;acl&#34;</span><span class="p">:</span> <span class="p">[</span> <span class="s2">&#34;luci-app-ddns&#34;</span> <span class="p">]</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div></li>
+</ul>
 <h4 id="显示菜单">显示菜单</h4>
 <p>那么页面的菜单是如何显示的呢？答案是通过 header。看 一下 themes 里面的 <code>header.js</code>
 。</p>
@@ -974,14 +1392,94 @@ tpl.render 也就对应了文件 template.lua 中的 render 函数。</p>
 Save &amp; Apply 按钮，又发生了些什么？</p>
 <p>一句话概括就是：luci 通过 ubus 调用 rpcd 的 uci commit，然后 rpcd 发出 ubus 的
 config.change event。</p>
-<p>当点击按钮 Apply unchecked 或者 Save &amp; Apply 的时候，浏览器会发送
-<code>action_apply_unchecked</code> 或者 <code>action_apply_rollback</code> 的 request 给服务器。根据
-<code>/usr/share/luci/menu.d/luci-base.json</code> 的配置，会调用
+<p>页面在修改配置后，会把修改的内容(uci change)存放在 <code>/var/run/rpcd/uci-&lt;session id&gt;</code> 目录下。这个其实是通过配置 uci 的 savedir 来实现的。</p>
+<p>当点击按钮 Apply unchecked 或者 Save &amp; Apply 的时候，浏览器会发 uri
+<code>admin/uci/apply_rollback</code> 或 <code>admin/uci/apply_unchecked</code> 的 request 给服务器</p>
+<p>这里需要说明一下 <code>apply_rollback</code> 和 <code>apply_unchecked</code> 的区别。前者在应用新的配置的时候，如果出错，则会回滚（也就是退回到旧的配置）；而后者则不会。</p>
+<p>根据 <code>/usr/share/luci/menu.d/luci-base.json</code> 的配置，会调用
 <code>/usr/lib/lua/luci/controller/admin/uci.lua</code> 中的函数 <a href="https://github.com/openwrt/luci/blob/openwrt-19.07/modules/luci-base/luasrc/controller/admin/uci.lua#L43" target="_blank" rel="noopener noreffer">action_apply_unchecked</a> 或者函数 <a href="https://github.com/openwrt/luci/blob/openwrt-19.07/modules/luci-base/luasrc/controller/admin/uci.lua#L32" target="_blank" rel="noopener noreffer">action_apply_rollback</a> ，之后会调用 <code>/usr/lib/lua/luci/model/uci.lua</code> 中的
 <a href="https://github.com/openwrt/luci/blob/openwrt-19.07/modules/luci-base/luasrc/model/uci.lua#L120" target="_blank" rel="noopener noreffer">apply</a> 函数。该函数会调用 &lsquo;ubus call uci apply&rsquo;，从而转到 rpcd。</p>
-<p>接下来就会调用到 <code>rpcd/uci.c</code> 中的函数 <a href="https://lxr.openwrt.org/source/rpcd/uci.c#L1566" target="_blank" rel="noopener noreffer">rpc_uci_apply</a> ，调用 <a href="https://lxr.openwrt.org/source/rpcd/uci.c#L1444" target="_blank" rel="noopener noreffer">rpc_uci_apply_config</a>，最终执行了函数 <a href="https://lxr.openwrt.org/source/rpcd/uci.c#L1304" target="_blank" rel="noopener noreffer">rpc_uci_trigger_event</a> ，为每个提交的配置发出对应的 ubus 的
-config.change 事件。</p>
-<p>以 firewall 为例。在 <code>/etc/init.d/firewall</code> 脚本中，在系统启动时，通过
+<p>接下来就会调用到 <code>rpcd/uci.c</code> 中的函数 <a href="https://lxr.openwrt.org/source/rpcd/uci.c#L1566" target="_blank" rel="noopener noreffer">rpc_uci_apply</a> 。该函数会根据前面
+<code>/var/run/rpcd/uci-&lt;session id&gt;</code> 中暂存的 uci 修改文件调用 <a href="https://lxr.openwrt.org/source/rpcd/uci.c#L1444" target="_blank" rel="noopener noreffer">rpc_uci_apply_config</a>，来对每一个 config 进行处理。最终执行了函数 <a href="https://lxr.openwrt.org/source/rpcd/uci.c#L1304" target="_blank" rel="noopener noreffer">rpc_uci_trigger_event</a> ，为每个提交的配置发出对应的 ubus 的 config.change 事件。</p>
+<p>为帮助理解，我们打印出了修改 system 页面的 timezone 后，调用 apply 函数时当
+rollback 为 false 的时候 <code>-</code> 和 <code>-.changes</code> 的内容</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="o">[</span>10:46:13<span class="o">]</span>: <span class="nv">_</span><span class="o">=</span>
+<span class="o">{</span>
+    <span class="nv">changes</span> <span class="o">=</span> <span class="o">{</span>
+        <span class="nv">system</span> <span class="o">=</span> <span class="o">{</span>
+            <span class="nv">1</span> <span class="o">=</span> <span class="o">{</span>
+                <span class="nv">1</span> <span class="o">=</span> <span class="s1">&#39;set&#39;</span>
+                <span class="nv">2</span> <span class="o">=</span> <span class="s1">&#39;cfg01e48a&#39;</span>
+                <span class="nv">3</span> <span class="o">=</span> <span class="s1">&#39;timezone&#39;</span>
+                <span class="nv">4</span> <span class="o">=</span> <span class="s1">&#39;CAT-2&#39;</span>
+            <span class="o">}</span>
+            <span class="nv">2</span> <span class="o">=</span> <span class="o">{</span>
+                <span class="nv">1</span> <span class="o">=</span> <span class="s1">&#39;set&#39;</span>
+                <span class="nv">2</span> <span class="o">=</span> <span class="s1">&#39;cfg01e48a&#39;</span>
+                <span class="nv">3</span> <span class="o">=</span> <span class="s1">&#39;zonename&#39;</span>
+                <span class="nv">4</span> <span class="o">=</span> <span class="s1">&#39;Africa/Blantyre&#39;</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+<span class="o">{</span>
+    <span class="nv">system</span> <span class="o">=</span> <span class="o">{</span>
+        <span class="nv">1</span> <span class="o">=</span> <span class="o">{</span>
+            <span class="nv">1</span> <span class="o">=</span> <span class="s1">&#39;set&#39;</span>
+            <span class="nv">2</span> <span class="o">=</span> <span class="s1">&#39;cfg01e48a&#39;</span>
+            <span class="nv">3</span> <span class="o">=</span> <span class="s1">&#39;timezone&#39;</span>
+            <span class="nv">4</span> <span class="o">=</span> <span class="s1">&#39;CAT-2&#39;</span>
+        <span class="o">}</span>
+        <span class="nv">2</span> <span class="o">=</span> <span class="o">{</span>
+            <span class="nv">1</span> <span class="o">=</span> <span class="s1">&#39;set&#39;</span>
+            <span class="nv">2</span> <span class="o">=</span> <span class="s1">&#39;cfg01e48a&#39;</span>
+            <span class="nv">3</span> <span class="o">=</span> <span class="s1">&#39;zonename&#39;</span>
+            <span class="nv">4</span> <span class="o">=</span> <span class="s1">&#39;Africa/Blantyre&#39;</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>以 firewall 为例。在 <code>/etc/init.d/firewall</code> 脚本中，在系统启动时，通过
 <code>procd_add_reload_trigger firewall</code> 由 procd 向 ubus 注册 config.change event。一旦 ubus 收到 config.change 事件，将触发 <code>/etc/init.d/firewall reload</code></p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -1011,7 +1509,97 @@ config.change 事件。</p>
 <span class="o">}</span>
 </code></pre></td></tr></table>
 </div>
-</div><h2 id="faq">FAQ</h2>
+</div><h2 id="luci-页面编写">LUCI 页面编写</h2>
+<h3 id="e-是什么"><code>E()</code> 是什么？</h3>
+<p>我们经常看到 js 文件里有用 <code>E()</code> 函数包起来的内容。那么这个 E 到底是什么呢？查看代码可以发现 E 的定义在 <code>cbi.js</code> 中</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-js" data-lang="js"><span class="kd">function</span> <span class="nx">E</span><span class="p">(){</span><span class="k">return</span> <span class="nx">L</span><span class="p">.</span><span class="nx">dom</span><span class="p">.</span><span class="nx">create</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">L</span><span class="p">.</span><span class="nx">dom</span><span class="p">,</span><span class="nx">arguments</span><span class="p">)}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>所以这个 <code>E()</code> 其实只是 <a href="https://openwrt.github.io/luci/jsapi/LuCI.dom.html#create" target="_blank" rel="noopener noreffer">LuCI.dom.create()</a> 的一个别名。</p>
+<h3 id="templates">Templates</h3>
+<table>
+<thead>
+<tr>
+<th>&lt;% code %&gt;</th>
+<th>包含 lua 代码</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>&lt;% write(value) %&gt;</td>
+<td>调用 lua 函数</td>
+</tr>
+<tr>
+<td>&lt;%=value%&gt;</td>
+<td>输出 lua 变量</td>
+</tr>
+<tr>
+<td>&lt;% include(templateName) %&gt;</td>
+<td>加载模板</td>
+</tr>
+<tr>
+<td>&lt;%+templateName%&gt;</td>
+<td>加载模板</td>
+</tr>
+<tr>
+<td>&lt;%= translate(&ldquo;Text to translate&rdquo;) %&gt;</td>
+<td>转换文本语言</td>
+</tr>
+<tr>
+<td>&lt;%:Text to translate%&gt;</td>
+<td>同上</td>
+</tr>
+<tr>
+<td>&lt;%# comment %&gt;</td>
+<td>注释</td>
+</tr>
+</tbody>
+</table>
+<h2 id="menu-dot-d">menu.d</h2>
+<h3 id="depends">depends</h3>
+<p>depends 用来配置这个节点对应的依赖条件，如果条件不满足，则节点不显示。（注意如果
+uci 值改变并不会马上刷新 menu，必须要重新 login）</p>
+<p>下面是一个例子，upnp 页面只有在 uci 的 option <code>wireless.mesh.role</code> 的值为 agent 的时候才显示。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="s2">&#34;admin/internet/upnp&#34;</span>: <span class="o">{</span>
+	<span class="s2">&#34;title&#34;</span>: <span class="s2">&#34;UPnP&#34;</span>,
+	<span class="s2">&#34;order&#34;</span>: 70,
+	<span class="s2">&#34;action&#34;</span>: <span class="o">{</span>
+		<span class="s2">&#34;type&#34;</span>: <span class="s2">&#34;view&#34;</span>,
+		<span class="s2">&#34;path&#34;</span>: <span class="s2">&#34;sercomm-admin/upnp&#34;</span>
+	<span class="o">}</span>,
+	<span class="s2">&#34;depends&#34;</span>: <span class="o">{</span>
+		<span class="s2">&#34;acl&#34;</span>: <span class="o">[</span> <span class="s2">&#34;luci-app-upnp&#34;</span> <span class="o">]</span>,
+		<span class="s2">&#34;uci&#34;</span>: <span class="o">{</span> <span class="s2">&#34;wireless&#34;</span>: <span class="o">{</span><span class="s2">&#34;mesh&#34;</span>: <span class="o">{</span><span class="s2">&#34;role&#34;</span>: <span class="s2">&#34;agent&#34;</span><span class="o">}</span> <span class="o">}</span> <span class="o">}</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>对应的代码可以参考 <a href="https://github.com/openwrt/luci/blob/openwrt-22.03/modules/luci-base/luasrc/dispatcher.lua#L119%208" target="_blank" rel="noopener noreffer">check_uci_depends@dispatcher.lua</a></p>
+<p>注意到 depends 后面的描述可以是一个 object (用 <code>{ }</code> 表示），也可以是一个 array
+（用 <code>[ ]</code> 表示）。当为 object 的时候，里面的每一个选项之间是 and 的关系；当为
+array 的时候，则为 or 的关系。</p>
+<h2 id="faq">FAQ</h2>
 <h3 id="什么是-cbi">什么是 CBI ?</h3>
 <p>CBI 是 Configuration Bind Interface 的缩写。在 <a href="https://gitlab.nic.cz/turris/luci-cs/blob/a3bebe925cdefa56a1671d0919d797ef230cadd5/libs/cbi/luasrc/cbi.lua" target="_blank" rel="noopener noreffer">老的源码</a> 中有以下说明</p>
 <div class="highlight"><div class="chroma">
@@ -1122,9 +1710,199 @@ uci commit luci
 <pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">uci <span class="nb">set</span> luci.ccache.enable<span class="o">=</span>0<span class="p">;</span> uci commit luci
 </code></pre></td></tr></table>
 </div>
-</div><h2 id="调试">调试</h2>
-<p>luci 的关键功能很多都是在 lua 脚本中实现的。因此为了能进行调试，我们可以在目录
-<code>/usr/lib/lua/luci</code> 中添加文件 <code>log.lua</code> ，内容如下</p>
+</div><h3 id="如何实时的显示或隐藏菜单项">如何实时的显示或隐藏菜单项？</h3>
+<p>这个问题稍微有点复杂，需要先分析一下菜单是如何显示的</p>
+<p>首先，在客户端，会通过 <code>menu.js</code> 去获取菜单，大致的调用流程如下</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">- www/luci-static/resources/menu.js
+  - ui.menu
+    - UIMenu.load@ui.js
+      - get url admin/menu
+</code></pre></td></tr></table>
+</div>
+</div><p>可以看到，最终是发送对 uri <code>admin/menu</code> 的请求，向服务器获取 menu 的内容</p>
+<p>当服务器接收到请求后，就会根据 <code>/usr/share/luci/menu.d/luci-base.json</code> 的内容，找到 <code>admin/menu</code> 对应的 action，这里为调用 <code>action_menu</code></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">- action_menu
+  - action_menu@usr/lib/lua/luci/controller/admin/index.lua
+    - menu_json@/usr/lib/lua/dispatcher.lua
+</code></pre></td></tr></table>
+</div>
+</div><p>最终执行 <code>dispatcher.lua</code> 中的函数 <code>menu_json</code> 获得相应的内容，返回给客户端。</p>
+<p>这里需要注意，luci 会把 menu 的内容存放在 cache （ <code>/tmp/luci-*</code> ）中。所以为了获取新的 menu，要将 cache 清空才行。</p>
+<p>知道了原理，这个问题就有了思路。下面举例说明</p>
+<p>假设 package mesh 包含了以下文件</p>
+<ul>
+<li><code>/etc/config/mesh</code></li>
+<li><code>/www/luci-static/resources/view/system/mesh.js</code></li>
+<li><code>/usr/share/rpcd/acl.d/luci-base.json</code> （添加部分 acl 控制）</li>
+</ul>
+<p>配置文件 <code>/etc/config/mesh</code> 内容如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">config mesh <span class="s1">&#39;mesh&#39;</span>
+        option enabled <span class="s1">&#39;1&#39;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>其中 option enabled 控制了菜单 System-&gt;Startup 的显示与否。所以文件
+<code>/usr/share/luci/menu.d/luci-mod-system.json</code> 中关于 Startup 页面的配置如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">	<span class="s2">&#34;admin/system/startup&#34;</span>: <span class="o">{</span>
+		<span class="s2">&#34;title&#34;</span>: <span class="s2">&#34;Startup&#34;</span>,
+		<span class="s2">&#34;order&#34;</span>: 45,
+		<span class="s2">&#34;action&#34;</span>: <span class="o">{</span>
+			<span class="s2">&#34;type&#34;</span>: <span class="s2">&#34;view&#34;</span>,
+			<span class="s2">&#34;path&#34;</span>: <span class="s2">&#34;system/startup&#34;</span>
+		<span class="o">}</span>,
+		<span class="s2">&#34;depends&#34;</span>: <span class="o">{</span>
+			<span class="s2">&#34;uci&#34;</span>: <span class="o">{</span> <span class="s2">&#34;mesh&#34;</span>: <span class="o">{</span><span class="s2">&#34;mesh&#34;</span>: <span class="o">{</span><span class="s2">&#34;enabled&#34;</span>: <span class="s2">&#34;1&#34;</span><span class="o">}</span> <span class="o">}</span> <span class="o">}</span>
+		<span class="o">}</span>
+	<span class="o">}</span>,
+</code></pre></td></tr></table>
+</div>
+</div><p>depends 就说明了页面的显示依赖于 <code>mesh.mesh.enabled</code> 的取值，当其为 1 的时候才显示。</p>
+<p>为了达到目的， <code>mesh.js</code> 应该按照如下方式编写：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="s1">&#39;use strict&#39;</span><span class="p">;</span>
+<span class="s1">&#39;require view&#39;</span><span class="p">;</span>
+<span class="s1">&#39;require ui&#39;</span><span class="p">;</span>
+<span class="s1">&#39;require fs&#39;</span><span class="p">;</span>
+<span class="s1">&#39;require uci&#39;</span><span class="p">;</span>
+<span class="s1">&#39;require rpc&#39;</span><span class="p">;</span>
+<span class="s1">&#39;require form&#39;</span><span class="p">;</span>
+
+<span class="k">return</span> view.extend<span class="o">({</span>
+  render: <span class="k">function</span><span class="o">()</span> <span class="o">{</span>
+        var m, s, o<span class="p">;</span>
+        <span class="nv">m</span> <span class="o">=</span> new form.Map<span class="o">(</span><span class="s1">&#39;mesh&#39;</span>,<span class="o">(</span><span class="s1">&#39;Easy Mesh&#39;</span><span class="o">))</span><span class="p">;</span>
+        <span class="nv">s</span> <span class="o">=</span> m.section<span class="o">(</span>form.NamedSection, <span class="s1">&#39;mesh&#39;</span>, <span class="s1">&#39;mesh&#39;</span><span class="o">)</span><span class="p">;</span>
+        <span class="nv">o</span> <span class="o">=</span> s.option<span class="o">(</span>form.Flag, <span class="s1">&#39;enabled&#39;</span>, _<span class="o">(</span><span class="s1">&#39;Enable&#39;</span><span class="o">))</span><span class="p">;</span>
+
+        <span class="k">return</span> m.render<span class="o">()</span><span class="p">;</span>
+  <span class="o">}</span>,
+  handleSaveApply: <span class="k">function</span><span class="o">(</span>ev, mode<span class="o">)</span> <span class="o">{</span>
+    <span class="k">return</span> this.super<span class="o">(</span><span class="s1">&#39;handleSaveApply&#39;</span>, <span class="o">[</span>ev, mode<span class="o">])</span>.then<span class="o">(</span><span class="k">function</span><span class="o">()</span> <span class="o">{</span>
+      console.log<span class="o">(</span><span class="s2">&#34;handleSaveApply is called&#34;</span><span class="o">)</span><span class="p">;</span>
+	  fs.exec<span class="o">(</span><span class="s1">&#39;/usr/bin/cl_luci_cache.sh&#39;</span>, <span class="o">[</span><span class="s2">&#34;-c&#34;</span><span class="o">])</span>.then<span class="o">(</span><span class="k">function</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">if</span> <span class="o">(</span>L.ui.menu <span class="o">&amp;&amp;</span> L.ui.menu.flushCache<span class="o">)</span>
+			L.ui.menu.flushCache<span class="o">()</span><span class="p">;</span>
+		console.log<span class="o">(</span><span class="s2">&#34;ui.flushCache is called&#34;</span><span class="o">)</span><span class="p">;</span>
+		<span class="o">})</span>
+    <span class="o">})</span><span class="p">;</span>
+  <span class="o">}</span>
+<span class="o">})</span><span class="p">;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>可以看到，在 apply 的时候，先调用脚本 <code>/usr/bin/cl_luci_cache.sh</code> 清除服务器端的
+cache，然后再调用 <code>L.ui.menu.flushCache</code> 清楚客户端的 cache，重新跟服务器端索取
+menu 的内容。</p>
+<p>当然为了能执行脚本 <code>/usr/bin/cl_luci_cache.sh</code> ，还需要在 <code>luci-base.json</code> 中添加 acl 规则，内容如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">	<span class="s2">&#34;luci-app-mesh&#34;</span>: <span class="o">{</span>
+		<span class="s2">&#34;description&#34;</span>: <span class="s2">&#34;Grant access to mesh procedures&#34;</span>,
+		<span class="s2">&#34;read&#34;</span>: <span class="o">{</span>
+			<span class="s2">&#34;uci&#34;</span>: <span class="o">[</span> <span class="s2">&#34;mesh&#34;</span> <span class="o">]</span>
+		<span class="o">}</span>,
+		<span class="s2">&#34;write&#34;</span>: <span class="o">{</span>
+			<span class="s2">&#34;file&#34;</span>: <span class="o">{</span>
+				<span class="s2">&#34;/usr/bin/cl_luci_cache.sh&#34;</span>: <span class="o">[</span> <span class="s2">&#34;exec&#34;</span> <span class="o">]</span>
+			<span class="o">}</span>,
+			<span class="s2">&#34;uci&#34;</span>: <span class="o">[</span> <span class="s2">&#34;mesh&#34;</span> <span class="o">]</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>这样，就可以通过 enable/disable 页面上的 mesh enable 来显示或隐藏 Startup 页面了。</p>
+<h2 id="调试">调试</h2>
+<p>luci 的关键功能很多都是在 lua 脚本中实现的。因此我们常常需要添加一些调试信息来帮助理解。</p>
+<p>一般的 debug 信息输出可以使用</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">luci.util.perror<span class="o">(</span><span class="s2">&#34;blah blah&#34;</span><span class="o">)</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>然后用 logread 就能看到输出。</p>
+<p>为了打印更多的信息，我们可以在目录 <code>/usr/lib/lua/luci</code> 中添加文件 <code>log.lua</code> ，内容如下</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -1252,10 +2030,10 @@ uci commit luci
         <span class="n">end</span>
 
         <span class="n">local</span> <span class="n">cs</span> <span class="o">=</span> <span class="n">cstring</span> <span class="p">..</span> <span class="s">&#34;    &#34;</span><span class="p">;</span>
-    <span class="k">if</span> <span class="n">top_flag</span> <span class="n">then</span>
+        <span class="k">if</span> <span class="n">top_flag</span> <span class="n">then</span>
             <span class="nf">local_print</span><span class="p">(</span><span class="n">cstring</span> <span class="p">..</span><span class="s">&#34;{&#34;</span><span class="p">);</span>
-        <span class="n">top_flag</span> <span class="o">=</span> <span class="nb">false</span>
-    <span class="n">end</span>
+            <span class="n">top_flag</span> <span class="o">=</span> <span class="nb">false</span>
+        <span class="n">end</span>
         <span class="k">if</span><span class="p">(</span><span class="n">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">==</span><span class="s">&#34;table&#34;</span><span class="p">)</span> <span class="n">then</span>
             <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="n">in</span> <span class="n">pairs</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="k">do</span>
         <span class="k">if</span> <span class="n">type</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">~=</span> <span class="s">&#34;table&#34;</span> <span class="n">then</span>
@@ -1291,7 +2069,7 @@ uci commit luci
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-lua" data-lang="lua"><span class="kd">local</span> <span class="n">log</span> <span class="o">=</span> <span class="n">require</span> <span class="s2">&#34;luci.log&#34;</span>
+<pre tabindex="0" class="chroma"><code class="language-lua" data-lang="lua"><span class="kd">local</span> <span class="n">log</span> <span class="o">=</span> <span class="n">require</span> <span class="s2">&#34;log.lua&#34;</span>
 </code></pre></td></tr></table>
 </div>
 </div><p>在函数 <code>dispatch</code> 中打印</p>
@@ -1331,6 +2109,7 @@ uci commit luci
 </div><h2 id="参考">参考</h2>
 <ul>
 <li><a href="https://github.com/seamustuohy/luci_tutorials" target="_blank" rel="noopener noreffer">luci_tutorials</a></li>
+<li><a href="https://forum.openwrt.org/t/description-of-the-json-in-menu-d-and-acl-d/104013/4" target="_blank" rel="noopener noreffer">Description of the JSON in menu.d and acl.d</a></li>
 <li><a href="https://github.com/openwrt/luci/tree/master/docs" target="_blank" rel="noopener noreffer">https://github.com/openwrt/luci/tree/master/docs</a></li>
 <li><a href="https://openwrt.org/docs/guide-developer/luci" target="_blank" rel="noopener noreffer">https://openwrt.org/docs/guide-developer/luci</a></li>
 <li><a href="http://openwrt.github.io/luci/jsapi/index.html" target="_blank" rel="noopener noreffer">http://openwrt.github.io/luci/jsapi/index.html</a></li>
@@ -1339,12 +2118,13 @@ uci commit luci
 <li><a href="https://github.com/openwrt/luci/wiki/DevelopmentEnvironmentHowTo" target="_blank" rel="noopener noreffer">HowTo: Setting up a Development Environment</a></li>
 <li><a href="https://icode.best/i/39853430929644" target="_blank" rel="noopener noreffer">LuCI入门</a>  <a href="https://icode.best/i/47766730937809%20" target="_blank" rel="noopener noreffer">LuCI之CBI</a>  <a href="https://icode.best/i/71684130952721%20%20" target="_blank" rel="noopener noreffer">LuCI之UCI</a></li>
 <li><a href="https://iyzm.net/openwrt/624.html" target="_blank" rel="noopener noreffer">OpenWrt达人教程之开发人员入门指南</a></li>
+<li><a href="https://git.nju.edu.cn/nju/openwrt-luci/-/tree/master/applications/luci-app-example" target="_blank" rel="noopener noreffer">luci example</a></li>
 </ul>
 </div><div class="post-footer" id="post-footer">
     <div class="post-info">
         <div class="post-info-line">
             <div class="post-info-mod">
-                <span>更新于 2023-02-03</span>
+                <span>更新于 2023-06-08</span>
             </div>
             <div class="post-info-license"></div>
         </div>
