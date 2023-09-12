@@ -10,7 +10,7 @@
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://f0ghua.github.io/ipv6_faq/" /><meta property="og:image" content="https://f0ghua.github.io/logo.png"/><meta property="article:section" content="posts" />
 <meta property="article:published_time" content="2023-09-11T16:33:00+08:00" />
-<meta property="article:modified_time" content="2023-09-12T10:58:10+08:00" />
+<meta property="article:modified_time" content="2023-09-12T14:03:19+08:00" />
 
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:image" content="https://f0ghua.github.io/logo.png"/>
@@ -29,8 +29,8 @@
         "mainEntityOfPage": {
             "@type": "WebPage",
             "@id": "https:\/\/f0ghua.github.io\/ipv6_faq\/"
-        },"image": ["https:\/\/f0ghua.github.io\/images\/Apple-Devices-Preview.png"],"genre": "posts","wordcount":  5268 ,
-        "url": "https:\/\/f0ghua.github.io\/ipv6_faq\/","datePublished": "2023-09-11T16:33:00+08:00","dateModified": "2023-09-12T10:58:10+08:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
+        },"image": ["https:\/\/f0ghua.github.io\/images\/Apple-Devices-Preview.png"],"genre": "posts","wordcount":  5897 ,
+        "url": "https:\/\/f0ghua.github.io\/ipv6_faq\/","datePublished": "2023-09-11T16:33:00+08:00","dateModified": "2023-09-12T14:03:19+08:00","license": "This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.","publisher": {
             "@type": "Organization",
             "name": "xxxx","logo": "https:\/\/f0ghua.github.io\/images\/avatar.png"},"author": {
                 "@type": "Person",
@@ -110,8 +110,8 @@
             <div class="toc-content" id="toc-content-auto"></div>
         </div><article class="page single"><h1 class="single-title animated flipInX">IPv6 FAQ</h1><div class="post-meta">
             <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>fog</a></span></div>
-            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2023-09-11">2023-09-11</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 5268 字&nbsp;
-                <i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 11 分钟&nbsp;</div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2023-09-11">2023-09-11</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;约 5897 字&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;预计阅读 12 分钟&nbsp;</div>
         </div><div class="details toc" id="toc-static"  kept="">
                 <div class="details-summary toc-title">
                     <span>目录</span>
@@ -132,12 +132,18 @@
         <li><a href="#q-linux-使用-ip-命令查看的时候可以看到每个-ipv6-地址后面都有-lifetime-这是什么意思">Q: Linux 使用 ip 命令查看的时候可以看到每个 IPv6 地址后面都有 lifetime，这是什么意思 ？</a></li>
         <li><a href="#q-一个接口上的-ipv6-地址是如何产生的">Q: 一个接口上的 IPv6 地址是如何产生的？</a></li>
         <li><a href="#q-链路本地地址-lla-是如何生成的">Q: 链路本地地址（LLA）是如何生成的？</a></li>
+        <li><a href="#什么是网络发现协议-ndp-network-discovery-protocol">什么是网络发现协议（ NDP - Network Discovery Protocol）？</a>
+          <ul>
+            <li><a href="#邻居发现协议">邻居发现协议</a></li>
+            <li><a href="#路由发现协议">路由发现协议</a></li>
+          </ul>
+        </li>
         <li><a href="#q-ula-和-gua-是如何获取的">Q: ULA 和 GUA 是如何获取的？</a></li>
         <li><a href="#q-slaac-是怎么工作的">Q: SLAAC 是怎么工作的？</a></li>
         <li><a href="#q-什么是-dhcpv6-stateless-和-dhcpv6-stateful">Q: 什么是 DHCPv6 Stateless 和 DHCPv6 Stateful?</a></li>
         <li><a href="#q-slaac-和-dhcpv6-是如何协同工作的">Q: SLAAC 和 DHCPv6 是如何协同工作的？</a></li>
         <li><a href="#q-openwrt-中是如何通过配置项实现-ipv6-各种获取-ip-的方式的">Q: OpenWRT 中是如何通过配置项实现 IPv6 各种获取 IP 的方式的？</a></li>
-        <li><a href="#q-如何使用-wireshark-过滤-radvd-和-dhcpv6-的封包">Q: 如何使用 wireshark 过滤 radvd 和 dhcpv6 的封包？</a></li>
+        <li><a href="#q-如何使用-wireshark-过滤-slaac-和-dhcpv6-的封包">Q: 如何使用 wireshark 过滤 slaac 和 dhcpv6 的封包？</a></li>
       </ul>
     </li>
     <li><a href="#appendix">Appendix</a>
@@ -416,6 +422,60 @@ anycast（RFC1546）等几种。anycast 地址很少涉及，所以这里不予�
 </ul>
 <p>前面三步从 48 位的 MAC 转换成 64 位主机地址的过程称为 EUI64。</p>
 <p>需要注意的是，该地址产生之后，还需要使用 NDP（Network Discovery Protocol）协议，向本地链路发送 NS 包，执行 DAD 检测，检查是否该地址已经被占用。如果有人回复 NA，那就说明有冲突，需要人工校正。</p>
+<h3 id="什么是网络发现协议-ndp-network-discovery-protocol">什么是网络发现协议（ NDP - Network Discovery Protocol）？</h3>
+<p>网络发现协议（NDP）定义在 RFC4861 中，主要包含了 2 部分的内容。</p>
+<ul>
+<li>NS, NA</li>
+<li>RS, RA</li>
+</ul>
+<h4 id="邻居发现协议">邻居发现协议</h4>
+<p>邻居发现协议主要用来查询 IPv6 地址对应的主机的 MAC 地址。使用到了两种类型的封包，即
+NS 和 NA。</p>
+<p>一个正常的 NS， NA 交互如图所示</p>
+<p><figure><a class="lightgallery" href="/ox-hugo/ipv6_faq.img.66ad38d7.png" title="ns_na" data-thumbnail="/ox-hugo/ipv6_faq.img.66ad38d7.png" data-sub-html="<h2>ns_na</h2><p>ns_na</p>">
+        <img
+            class="lazyload"
+            src="/svg/loading.min.svg"
+            data-src="/ox-hugo/ipv6_faq.img.66ad38d7.png"
+            data-srcset="/ox-hugo/ipv6_faq.img.66ad38d7.png, /ox-hugo/ipv6_faq.img.66ad38d7.png 1.5x, /ox-hugo/ipv6_faq.img.66ad38d7.png 2x"
+            data-sizes="auto"
+            alt="/ox-hugo/ipv6_faq.img.66ad38d7.png" />
+    </a><figcaption class="image-caption">ns_na</figcaption>
+    </figure></p>
+<p>完整的封包可以 <a href="https://www.cloudshark.org/captures/798fa8a6506a" target="_blank" rel="noopener noreffer">在线查看</a> ，也可以从以下链接下载</p>
+<ul>
+<li><a href="/ox-hugo/ipv6_faq.file.ns_na.pcap" rel="">ipv6_faq.file.ns_na.pcap</a></li>
+</ul>
+<p>要查看 NDP 的解析结果，Linux 下可以通过以下命令查看</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">ip -6 neighbor show
+</code></pre></td></tr></table>
+</div>
+</div><p>输出为</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">fe80::200:ff:feaa:2 dev eth0 lladdr 00:00:00:aa:00:02 router STALE
+</code></pre></td></tr></table>
+</div>
+</div><p>该命令类似 ipv4 的 <code>arp -a</code></p>
+<h4 id="路由发现协议">路由发现协议</h4>
+<p>路由发现协议则是主机用来查找网络中的路由器（网关）。主要使用的封包类型为 RS 和 RA。</p>
+<p>当路由启用了 radvd 服务，那么每次启动后就会向本地链路网络周期性的发送 RA 封包。主机也可以通过主动发送 RS 封包查询 RA。</p>
+<p>通过路由发现协议，主机可以从 RA 包中获取到主机的 IPv6 地址前缀，默认路由的网关地址，以及 DNS 地址（RFC6106）。这样，正常上网所需要的要素就齐全了。</p>
+<p>当主机接收到 RA 报文的时候，应该根据报文中的内容添加或者删除路由。具体的规则参考
+RFC4191 。</p>
+<p>如何添加路由主要看两个地方</p>
+<ul>
+<li>一个是在 RA 报文的 Flags 中的 <code>Default Router Preference</code> 字段和 <code>Router lifetime</code> 。当 Lifetime 不为 0 的时候，添加默认路由；为 0 时表示删除该路由。观察 <a href="https://www.cloudshark.org/captures/69fd7a31fe57" target="_blank" rel="noopener noreffer">ipv6-router-advertisement-leaving.pcapng</a> 的 packet 1 和 packet 2。主机接收到第一个 RA 的时候就会添加路由，而接受到第二个的时候则会删除默认路由。</li>
+<li>另一个是看 Route Information Option，这个里面也有 Preference 和 Lifetime。用法同上，但是优先级要高于前者。两者的区别在于前者只用来管理默认路由，而 Option 大多用来添加某特定前缀的路由</li>
+</ul>
 <h3 id="q-ula-和-gua-是如何获取的">Q: ULA 和 GUA 是如何获取的？</h3>
 <p>IPv6 地址的获取方式可以分为 2 种。一个是 SLAAC，还有一个是 DHCPv6。</p>
 <p>SLAAC 协议的具体描述在 RFC4862 中。利用 NDP 中定义的 RA 报文，给主机提供了前缀，路由，默认网关等信息，从而保证了在网络中没有其他服务器的情况，主机可以获取到 IPv6 地址并正常的访问外部网络。</p>
@@ -811,13 +871,21 @@ flag 也为 off 时，将不通过 DHCPv6 获得其他参数</li>
 <p>force 和 try 的区别在于，如果 DHCPv6 server 不支持 IA_NA，那么 force 会保持
 DHCPv6 stateful 模式，然后失败重发 solicit；而 try 会自动切换成 DHCPv6 stateless
 模式</p>
-<h3 id="q-如何使用-wireshark-过滤-radvd-和-dhcpv6-的封包">Q: 如何使用 wireshark 过滤 radvd 和 dhcpv6 的封包？</h3>
+<h3 id="q-如何使用-wireshark-过滤-slaac-和-dhcpv6-的封包">Q: 如何使用 wireshark 过滤 slaac 和 dhcpv6 的封包？</h3>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="o">((</span>icmpv6.type <span class="o">==</span> <span class="m">133</span> <span class="o">||</span> icmpv6.type <span class="o">==</span> <span class="m">134</span> <span class="o">||</span> dhcpv6<span class="o">)</span> <span class="o">&amp;&amp;</span> <span class="o">(</span>eth.addr <span class="o">==</span> &lt;client_mac&gt; <span class="o">||</span> eth.addr <span class="o">==</span> &lt;server_mac&gt;<span class="o">))</span>
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># 过滤 NS NA</span>
+icmpv6.type<span class="o">==</span><span class="m">135</span> <span class="o">||</span> icmpv6.type <span class="o">==</span> <span class="m">136</span>
+
+<span class="c1"># 过滤指定设备间的 RS RA, dhcpv6</span>
+<span class="o">((</span>icmpv6.type <span class="o">==</span> <span class="m">133</span> <span class="o">||</span> icmpv6.type <span class="o">==</span> <span class="m">134</span> <span class="o">||</span> dhcpv6<span class="o">)</span> <span class="o">&amp;&amp;</span> <span class="o">(</span>eth.addr <span class="o">==</span> &lt;client_mac&gt; <span class="o">||</span> eth.addr <span class="o">==</span> &lt;server_mac&gt;<span class="o">))</span>
 </code></pre></td></tr></table>
 </div>
 </div><h2 id="appendix">Appendix</h2>
