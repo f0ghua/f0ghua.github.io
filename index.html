@@ -97,8 +97,12 @@
     <div id="search-dropdown-mobile"></div>
 </div>
 <main class="main">
-                <div class="container"><div class="page home" posts><div class="home-profile"><h2 class="home-subtitle">分享是一种快乐</h2><div class="links"><a href="https://github.com/f0ghua" title="GitHub" target="_blank" rel="noopener noreffer me"><i class="fab fa-github-alt fa-fw"></i></a><a href="mailto:fog_hua@126.com" title="Email" rel=" me"><i class="far fa-envelope fa-fw"></i></a><a href="/index.xml" title="RSS" target="_blank" rel="noopener noreffer me"><i class="fas fa-rss fa-fw"></i></a></div></div>
+                <div class="container"><div class="page home" posts><div class="home-profile"><h2 class="home-subtitle">知其然亦知其所以然</h2><div class="links"><a href="https://github.com/f0ghua" title="GitHub" target="_blank" rel="noopener noreffer me"><i class="fab fa-github-alt fa-fw"></i></a><a href="mailto:fog_hua@126.com" title="Email" rel=" me"><i class="far fa-envelope fa-fw"></i></a><a href="/index.xml" title="RSS" target="_blank" rel="noopener noreffer me"><i class="fas fa-rss fa-fw"></i></a></div></div>
 <article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
+        <a href="/strsep/">C 语言常用库函数-strsep</a>
+    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>fog</a></span>&nbsp;<span class="post-publish">发布于 <time datetime="2024-09-09">2024-09-09</time></span></div><div class="content">原则 不要使用 strtok，需要类似功能用 strsep 代替。 strtok 函数原型 1 2 3 #include &lt;string.h&gt; char *strtok(char *str, const char *delim); 用法分析 不要使用这个函数，除非你确切的了解它，并且知道你现在</div><div class="post-footer">
+        <a href="/strsep/">阅读全文</a></div>
+</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
         <a href="/ipv6_faq/">IPv6 FAQ</a>
     </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>fog</a></span>&nbsp;<span class="post-publish">发布于 <time datetime="2023-09-11">2023-09-11</time></span></div><div class="content">本来是想写一篇 IPv6 的文档，可以帮助不熟悉 IPv6 的同事快速了解 IPv6。但是后来发现越写越庞大，太过细节，重复了很多 IPv6 书籍中的内容，从而偏离了原本的</div><div class="post-footer">
         <a href="/ipv6_faq/">阅读全文</a></div>
@@ -120,11 +124,6 @@
     </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>fog</a></span>&nbsp;<span class="post-publish">发布于 <time datetime="2022-06-30">2022-06-30</time></span>&nbsp;<span class="post-category">收录于 <a href="/categories/programming/"><i class="far fa-folder fa-fw"></i>programming</a></span></div><div class="content">函数原型 1 2 3 #include &lt;string.h&gt; char *strncpy(char *dest, const char *src, size_t n); 用法分析 strncpy 由于添加了长度限制，避免了缓冲区溢出的问题。但在使用这个函数的时候必须要注意: strncpy 只有在源字符串的</div><div class="post-footer">
         <a href="/strncpy/">阅读全文</a><div class="post-tags">
                 <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/c/">c</a></div></div>
-</article><article class="single summary" itemscope itemtype="http://schema.org/Article"><h1 class="single-title" itemprop="name headline">
-        <a href="/wireless/">无线协议学习笔录</a>
-    </h1><div class="post-meta"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>fog</a></span>&nbsp;<span class="post-publish">发布于 <time datetime="2022-02-07">2022-02-07</time></span>&nbsp;<span class="post-category">收录于 <a href="/categories/network/"><i class="far fa-folder fa-fw"></i>network</a></span></div><div class="content">概述 从一次正常的连接说起 先从一次简单的连接看起。测试环境就是一台无线 STA 和一个 AP，以及一台用来抓包的 PC 。 1 2 3 4 5 6 7 8 9 10 +--------+ +-------+ | STA | | AP |</div><div class="post-footer">
-        <a href="/wireless/">阅读全文</a><div class="post-tags">
-                <i class="fas fa-tags fa-fw"></i>&nbsp;<a href="/tags/wifi/">wifi</a>,&nbsp;<a href="/tags/wireless/">wireless</a>,&nbsp;<a href="/tags/protocol/">protocol</a></div></div>
 </article><ul class="pagination"><li class="page-item active">
                     <span class="page-link">
                         <a href="/">1</a>
@@ -135,7 +134,7 @@
                     </span>
                 </li></ul></div></div>
             </main><footer class="footer">
-        <div class="footer-container"><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2022 - 2023</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">fog</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+        <div class="footer-container"><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2022 - 2024</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">fog</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
         </div>
     </footer></div>
 
